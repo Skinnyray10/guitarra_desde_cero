@@ -122,10 +122,15 @@ output { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 .af-nota span { font-family: var(--f-mono); color: var(--tenue); font-variant-numeric: tabular-nums; }
 .af-medidor { position: relative; height: 34px; border-radius: 8px; background: var(--fondo); border: 1px solid var(--linea); }
 .af-medidor::before { content: ""; position: absolute; left: 45%; width: 10%; top: 0; bottom: 0; background: var(--bien); opacity: .25; }
-.af-medidor i { position: absolute; top: 3px; bottom: 3px; left: 50%; width: 6px; margin-left: -3px; border-radius: 3px; background: var(--tenue); transition: left .12s; }
+.af-medidor i { position: absolute; top: 3px; bottom: 3px; left: 50%; width: 6px; margin-left: -3px; border-radius: 3px; background: var(--tenue); transition: left .15s ease-out; }
 .af-medidor.bien i { background: var(--bien); }
 .af-escala { display: flex; justify-content: space-between; font-size: .8rem; color: var(--tenue); }
 #af-msg { font-weight: 700; min-height: 3.1em; }
+.af-señal { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--tenue); }
+.af-nivel { flex: 1; height: 8px; border-radius: 4px; background: var(--linea); overflow: hidden; }
+.af-nivel i { display: block; height: 100%; width: 0; background: var(--bien); transition: width .08s linear; }
+#af-la { width: 4.5em; font: inherit; color: inherit; background: var(--papel); border: 1px solid var(--linea); border-radius: 8px; padding: 6px 8px; }
+#af-claridad { min-width: 7.5em; text-align: right; }
 
 /* Guitarra del afinador */
 .af-zona { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 20px; align-items: center; }
@@ -370,6 +375,10 @@ dt { font-weight: 700; } dd { margin: 0; color: var(--tenue); }
       <label for="af-cuerda">Cuerda
         <select id="af-cuerda"><option value="0">Detectar sola</option><option value="6">6ª</option><option value="5">5ª</option><option value="4">4ª</option><option value="3">3ª</option><option value="2">2ª</option><option value="1">1ª</option></select>
       </label>
+      <label for="af-afinacion">Afinación
+        <select id="af-afinacion"><option value="estandar">Estándar (Mi La Re Sol Si Mi)</option><option value="dropd">Drop D (6ª en Re)</option><option value="medio">Medio tono abajo</option></select>
+      </label>
+      <label for="af-la">La de referencia <input type="number" id="af-la" min="430" max="450" step="1" value="440"> Hz</label>
     </div>
     <div class="af-zona">
     <div class="af-guitarra" id="af-guitarra"></div>
@@ -377,12 +386,13 @@ dt { font-weight: 700; } dd { margin: 0; color: var(--tenue); }
       <div class="af-nota"><strong id="af-nota">–</strong><span id="af-hz"></span></div>
       <div class="af-medidor" id="af-medidor"><i id="af-aguja"></i></div>
       <div class="af-escala"><span>grave</span><span>afinada</span><span>aguda</span></div>
+      <div class="af-señal"><span>Micrófono</span><div class="af-nivel" title="Nivel del micrófono"><i id="af-nivel"></i></div><span id="af-claridad"></span></div>
       <p id="af-msg">El audio se analiza en tu navegador; no se graba ni se envía a ningún lado.</p>
       <p class="lectura" id="af-cuenta">Cuerdas afinadas: 0 de 6</p>
     </div>
     </div>
     <p>La guitarra muestra qué clavija mover. Toca una clavija para elegir esa cuerda y, con el micrófono apagado, escuchar cómo debe sonar.</p>
-    <p>Si una cuerda está muy lejos de su nota, elígela a mano en la lista para que el afinador no la confunda con la vecina.</p>
+    <p>Si una cuerda está muy lejos de su nota, elígela a mano en la lista para que el afinador no la confunda con la vecina. Afina en un lugar silencioso y con el teléfono o la computadora cerca de la guitarra.</p>
   </div>
   <div class="tarjeta">
     <h3>Partes que vas a nombrar todo el tiempo</h3>
@@ -950,31 +960,62 @@ function afLuz(c, orden, bien) {
 function afElegir(e) {
   const g = e.target.closest('.clavija'); if (!g) return;
   $('#af-cuerda').value = g.dataset.c;
-  if (!af.activo) { tocar(+g.dataset.c, 0, undefined, 0.8); afLuz(+g.dataset.c, '', g.classList.contains('lista')); setTimeout(() => af.activo || afLuz(0), 1200); }
+  if (!af.activo) { tocar(+g.dataset.c, afObjetivo(+g.dataset.c) - midiDe(+g.dataset.c, 0), undefined, 0.8); afLuz(+g.dataset.c, '', g.classList.contains('lista')); setTimeout(() => af.activo || afLuz(0), 1200); }
 }
 $('#af-guitarra').addEventListener('click', afElegir);
 $('#af-guitarra').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); afElegir(e); } });
 // ---------- Micrófono compartido: un solo análisis para el afinador y los retos ----------
-// Se analiza a la mitad de muestras (≈24 kHz): sobra para una guitarra y cuesta 4 veces menos en equipos modestos.
-const mic = { flujo: null, nodo: null, id: null, alCerrar: null, rmsPrev: 0 };
+// Detector: pitchy (método McLeod con FFT, licencia MIT). Analiza ventanas de ~170 ms en menos de 1 ms,
+// lo que da lecturas estables sin trabar equipos modestos. Si no carga, se usa detectarTono (mismo método).
+let Pitchy = null, pitchyCargado = false;
+async function cargarPitchy() {
+  if (pitchyCargado) return Pitchy;
+  pitchyCargado = true;
+  for (const url of ['./lib/pitchy.mjs', 'https://cdn.jsdelivr.net/npm/pitchy@4.1.0/+esm']) {
+    try { Pitchy = (await import(url)).PitchDetector; if (Pitchy) break; } catch (e) {}
+  }
+  return Pitchy;
+}
+const mic = { flujo: null, nodo: null, id: null, alCerrar: null, rmsPrev: 0, piso: null, esperar: 0 };
 const MSG_SIN_MIC = 'No hay acceso al micrófono. Dentro de Claude está bloqueado: abre la página en Chrome, Edge, Firefox o Safari y acepta el permiso. Si lo rechazaste, actívalo en el candado de la barra de direcciones.';
 async function micAbrir(oyente, alCerrar) {
   micCerrar();
   const a = audio();
-  const flujo = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-  const analizador = a.createAnalyser(), datos = new Float32Array(4096), medio = new Float32Array(2048), sr = a.sampleRate / 2;
-  analizador.fftSize = 4096;
-  mic.flujo = flujo; mic.alCerrar = alCerrar; mic.rmsPrev = 0;
+  const [flujo, Detector] = await Promise.all([
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }),
+    cargarPitchy(),
+  ]);
+  // Filtros: quitan el zumbido grave (<60 Hz) y los agudos que no son de la guitarra (>1.5 kHz)
+  const graves = new BiquadFilterNode(a, { type: 'highpass', frequency: 60 });
+  const agudos = new BiquadFilterNode(a, { type: 'lowpass', frequency: 1500 });
+  const N = 8192, analizador = new AnalyserNode(a, { fftSize: N }), datos = new Float32Array(N), sr = a.sampleRate;
+  const detector = Detector ? Detector.forFloat32Array(N) : null, medio = new Float32Array(2048);
+  mic.flujo = flujo; mic.alCerrar = alCerrar; mic.rmsPrev = 0; mic.piso = null; mic.esperar = 0;
   mic.nodo = a.createMediaStreamSource(flujo);
-  mic.nodo.connect(analizador);
+  mic.nodo.connect(graves).connect(agudos).connect(analizador);
   mic.id = setInterval(() => {
     analizador.getFloatTimeDomainData(datos);
     let e = 0;
-    for (let i = 0; i < 2048; i++) { medio[i] = (datos[2 * i] + datos[2 * i + 1]) / 2; e += medio[i] * medio[i]; }
-    const rms = Math.sqrt(e / 2048), ataque = rms > 0.02 && rms > mic.rmsPrev * 1.6;   // ataque = cuerda recién pulsada
+    for (let i = N - 2048; i < N; i++) e += datos[i] * datos[i];        // volumen de los últimos ~43 ms
+    const rms = Math.sqrt(e / 2048), ahora = performance.now();
+    // Ruido de fondo (zumbido eléctrico, ventilador): se mide desde el primer instante; baja rápido y sube muy lento
+    mic.piso = mic.piso == null || rms < mic.piso ? rms : mic.piso * 0.998 + rms * 0.002;
+    const ataque = rms > Math.max(0.01, mic.piso * 4) && rms > mic.rmsPrev * 1.6;
     mic.rmsPrev = rms;
-    oyente(detectarTono(medio, sr), ataque);
-  }, 90);
+    if (ataque) mic.esperar = ahora + 90;                             // el golpe de la púa suena desafinado: se ignora
+    let f = null, claridad = 0;
+    if (rms > Math.max(0.004, mic.piso * 2.5) && ahora >= mic.esperar) {
+      if (detector) {
+        const [p, c] = detector.findPitch(datos, sr);
+        claridad = c;
+        if (c >= 0.9 && p > 70 && p < 1100) f = p;                    // bajo 70 Hz no hay cuerdas (Re de Drop D: 73 Hz); el zumbido de la luz es de 60 Hz
+      } else {
+        for (let i = 0; i < 2048; i++) medio[i] = (datos[N - 4096 + 2 * i] + datos[N - 4096 + 2 * i + 1]) / 2;
+        f = detectarTono(medio, sr / 2); if (f && f < 70) f = null; claridad = f ? 1 : 0;
+      }
+    }
+    oyente(f, ataque, { nivel: rms, claridad });
+  }, 60);
 }
 function micCerrar() {
   if (!mic.flujo) return;
@@ -987,30 +1028,73 @@ function micCerrar() {
 }
 relojes.push({ parar: micCerrar });
 
-const af = { activo: false, hist: [], vacios: 0 };
-function afMostrar(f) {
-  if (!f) { if (++af.vacios === 12) { af.hist = []; afLuz(0); $('#af-msg').textContent = 'Toca una cuerda al aire y déjala sonar.'; } return; }
+const AFINACIONES = {                                              // MIDI de la 1ª a la 6ª cuerda
+  estandar: [64, 59, 55, 50, 45, 40],
+  dropd: [64, 59, 55, 50, 45, 38],
+  medio: [63, 58, 54, 49, 44, 39],
+};
+const af = { activo: false, hist: [], vacios: 0, cuerda: 0, cents: null, estable: 0 };
+const afObjetivo = c => AFINACIONES[$('#af-afinacion').value][c - 1];
+const afHz = m => (+$('#af-la').value || 440) * 2 ** ((m - 69) / 12);
+function afNombres() {                                               // nombres de las clavijas según la afinación
+  $$('#af-guitarra .clavija tspan').forEach(t => t.dataset.midi = afObjetivo(+t.closest('.clavija').dataset.c));
+  ponerNombres();
+}
+$('#af-afinacion').addEventListener('change', () => { $$('#af-guitarra .lista').forEach(g => g.classList.remove('lista')); afLuz(0); afNombres(); });
+$('#af-la').addEventListener('change', e => { e.target.value = Math.min(450, Math.max(430, Math.round(+e.target.value || 440))); });
+function afMostrar(f, ataque, info = { nivel: 0, claridad: 0 }) {
+  $('#af-nivel').style.width = Math.min(100, Math.sqrt(info.nivel) * 220) + '%';
+  $('#af-claridad').textContent = !info.claridad ? '' : info.claridad >= 0.9 ? 'Nota clara' : 'Señal con ruido';
+  if (ataque) af.hist = [];
+  if (!f) {
+    if (++af.vacios === 15) {
+      af.hist = []; af.cents = null; af.estable = 0; afLuz(0);
+      $('#af-msg').textContent = info.nivel > 0.02
+        ? 'Escucho sonido pero no una nota clara. Toca una sola cuerda al aire y deja que suene.'
+        : 'Toca una cuerda al aire y déjala sonar.';
+    }
+    return;
+  }
   af.vacios = 0;
   af.hist.push(f); if (af.hist.length > 5) af.hist.shift();
-  const hz = [...af.hist].sort((p, q) => p - q)[af.hist.length >> 1];          // mediana
-  const cents = c => 1200 * Math.log2(hz / (440 * 2 ** ((midiDe(c, 0) - 69) / 12)));
-  const c = +$('#af-cuerda').value || [1, 2, 3, 4, 5, 6].reduce((p, q) => Math.abs(cents(q)) < Math.abs(cents(p)) ? q : p);
-  const d = Math.round(cents(c)), bien = Math.abs(d) <= 5;
-  $('#af-nota').textContent = `${ORDINAL[c]} · ${nombre(midiDe(c, 0))}`;
-  $('#af-hz').textContent = `${hz.toFixed(1)} Hz · ${d > 0 ? '+' : ''}${d} cents`;
-  $('#af-aguja').style.left = 50 + Math.max(-50, Math.min(50, d)) + '%';
-  $('#af-medidor').classList.toggle('bien', bien);
-  afLuz(c, d < 0 ? 'aprieta ▲' : 'afloja ▼', bien);
-  $('#af-msg').textContent = bien ? 'Afinada. Pasa a la siguiente cuerda.'
-    : d < 0 ? `${d < -50 ? 'Muy grave' : 'Grave'}: aprieta la clavija para subir el tono.`
-    : `${d > 50 ? 'Muy aguda' : 'Aguda'}: afloja la clavija para bajar el tono.`;
+  const hz = [...af.hist].sort((p, q) => p - q)[af.hist.length >> 1];           // mediana: descarta lecturas sueltas
+  const cents = c => 1200 * Math.log2(hz / afHz(afObjetivo(c)));
+  const manual = +$('#af-cuerda').value;
+  let c = manual, d;
+  if (c) {
+    d = cents(c);
+    if (Math.abs(Math.abs(d) - 1200) < 80) d -= Math.sign(d) * 1200;            // el micrófono marcó la octava: es la misma nota
+  } else {
+    const cerca = [1, 2, 3, 4, 5, 6].reduce((p, q) => Math.abs(cents(q)) < Math.abs(cents(p)) ? q : p);
+    // Se queda con la cuerda que venía midiendo mientras siga cerca: evita que salte a la vecina
+    c = af.cuerda && Math.abs(cents(af.cuerda)) < 150 && Math.abs(cents(af.cuerda)) - Math.abs(cents(cerca)) < 60 ? af.cuerda : cerca;
+    d = cents(c);
+  }
+  if (c !== af.cuerda) { af.cents = null; af.estable = 0; }
+  af.cuerda = c;
+  af.cents = af.cents == null ? d : af.cents * 0.6 + d * 0.4;                    // aguja suave, sin temblar
+  const r = Math.round(af.cents), cerca5 = Math.abs(r) <= 5;
+  af.estable = cerca5 ? af.estable + 1 : 0;
+  const lista = af.estable >= 8;                                                 // ≈0.5 s seguida en el centro
+  $('#af-nota').textContent = `${ORDINAL[c]} · ${nombre(afObjetivo(c))}`;
+  $('#af-hz').textContent = `${hz.toFixed(1)} Hz · ${r > 0 ? '+' : ''}${r} cents`;
+  $('#af-aguja').style.left = 50 + Math.max(-50, Math.min(50, r)) + '%';
+  $('#af-medidor').classList.toggle('bien', cerca5);
+  afLuz(c, r < 0 ? 'aprieta ▲' : 'afloja ▼', lista);
+  $('#af-msg').textContent = lista ? 'Afinada ✓ Pasa a la siguiente cuerda.'
+    : cerca5 ? 'Casi… deja que siga sonando.'
+    : Math.abs(r) > 300 ? 'Está muy lejos de su nota. Elige la cuerda en la lista para no confundirla con otra.'
+    : !manual && Math.abs(r) > 100 ? `${r < 0 ? 'Grave' : 'Aguda'} para la ${ORDINAL[c]}. Si estás tocando otra cuerda, elígela en la lista.`
+    : r < 0 ? `${r < -50 ? 'Muy grave' : 'Grave'}: aprieta la clavija para subir el tono.`
+    : `${r > 50 ? 'Muy aguda' : 'Aguda'}: afloja la clavija para bajar el tono.`;
 }
 function afParar() { if (af.activo) micCerrar(); }
 $('#af-btn').addEventListener('click', async () => {
   if (af.activo) return micCerrar();
   try {
-    await micAbrir(f => afMostrar(f), () => {
-      af.activo = false; af.hist = []; afLuz(0);
+    await micAbrir(afMostrar, () => {
+      af.activo = false; af.hist = []; af.cuerda = 0; af.cents = null; af.estable = 0; afLuz(0);
+      $('#af-nivel').style.width = '0'; $('#af-claridad').textContent = '';
       $('#af-btn').textContent = 'Activar micrófono';
       $('#af-msg').textContent = 'Micrófono apagado.';
     });
