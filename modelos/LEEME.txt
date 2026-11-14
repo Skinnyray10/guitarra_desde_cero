@@ -1,0 +1,2 @@
+Aquí van pose_landmarker_lite.task y hand_landmarker.task.
+Descárgalos con: sh descargar-modelos.sh

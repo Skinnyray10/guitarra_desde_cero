@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guitarra desde cero</title>
+<meta name="description" content="Aprende guitarra desde cero hasta crear tus propias melodías: afinador, acordes, ritmo, escalas y espejo de postura.">
+<meta name="theme-color" content="#2747d8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="iconos/icono-192.png">
+<link rel="apple-touch-icon" href="iconos/icono-180.png">
+<meta name="apple-mobile-web-app-title" content="Guitarra">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Idea: cuaderno de práctica. Índice de niveles a la izquierda, una lección a la vez,
+   y el diapasón (siempre de madera oscura) como pieza central de cada nivel. */
+:root {
+  --fondo: #f1f3f8;
+  --papel: #ffffff;
+  --tinta: #16203a;
+  --tenue: #5a6480;
+  --linea: #d5d9e6;
+  --acento: #2747d8;
+  --sobre-acento: #ffffff;
+  --nota: #f2a900;       /* cempasúchil: notas marcadas */
+  --tonica: #ff6b4a;     /* la nota "casa" de una escala */
+  --madera: #2a1c17;
+  --traste: #b9bcc4;
+  --cuerda: #e8dcc0;
+  --bien: #1f9d55;
+  --mal: #d6452b;
+  --f-titulo: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --f-texto: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: #10131c; --papel: #191d2a; --tinta: #e6e8f0; --tenue: #9aa3bd;
+    --linea: #2c3246; --acento: #8ea2ff; --sobre-acento: #10131c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fondo: #10131c; --papel: #191d2a; --tinta: #e6e8f0; --tenue: #9aa3bd;
+  --linea: #2c3246; --acento: #8ea2ff; --sobre-acento: #10131c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--fondo); color: var(--tinta); font: 17px/1.55 var(--f-texto); }
+h1, h2, h3 { font-family: var(--f-titulo); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: 1.9rem; font-weight: 800; }
+h2 { font-size: 1.6rem; font-weight: 800; }
+h3 { font-size: 1.1rem; font-weight: 600; margin-top: 8px; }
+p, ul, ol { margin: 0; max-width: 65ch; }
+ul, ol { padding-left: 1.2em; }
+li + li { margin-top: 4px; }
+a { color: var(--acento); }
+:focus-visible { outline: 3px solid var(--nota); outline-offset: 2px; }
+
+.pagina { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; display: grid; gap: 24px; }
+header { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; justify-content: space-between; }
+header p { color: var(--tenue); }
+.ajustes { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: .9rem; }
+.avance { display: flex; gap: 8px; align-items: center; color: var(--tenue); font-variant-numeric: tabular-nums; }
+.avance i { display: block; width: 120px; height: 8px; border-radius: 4px; background: var(--linea); overflow: hidden; }
+.avance b { display: block; height: 100%; width: 0; background: var(--acento); transition: width .3s; }
+
+.cuerpo { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+nav { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 4px; }
+nav a { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; padding: 10px 12px;
+  border-radius: 10px; text-decoration: none; color: var(--tinta); }
+nav a:hover { background: var(--papel); }
+nav a[aria-current="page"] { background: var(--acento); color: var(--sobre-acento); }
+nav .num { font: 800 1.1rem var(--f-titulo); }
+nav small { font-variant-numeric: tabular-nums; opacity: .75; }
+@media (max-width: 820px) {
+  .cuerpo { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  nav a { grid-template-columns: auto auto auto; white-space: nowrap; }
+}
+
+section[data-vista] { display: none; gap: 20px; }
+section[data-vista].activa { display: grid; }
+.tarjeta { background: var(--papel); border: 1px solid var(--linea); border-radius: 14px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.intro { color: var(--tenue); font-size: 1.05rem; }
+.fila { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.lectura { font-family: var(--f-mono); font-size: .9rem; color: var(--tenue); min-height: 1.5em; }
+
+button, select { font: inherit; color: inherit; }
+.boton { background: var(--acento); color: var(--sobre-acento); border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
+.boton.sec { background: transparent; color: var(--acento); box-shadow: inset 0 0 0 2px var(--acento); }
+.boton:hover { filter: brightness(1.1); }
+select { background: var(--papel); border: 1px solid var(--linea); border-radius: 8px; padding: 7px 10px; }
+label { display: inline-flex; gap: 8px; align-items: center; }
+input[type="range"] { accent-color: var(--acento); width: 130px; }
+input[type="checkbox"] { accent-color: var(--acento); width: 18px; height: 18px; flex: none; }
+output { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* Cuerdas al aire */
+.cuerdas { display: grid; gap: 8px; }
+.cuerdas button { display: grid; grid-template-columns: 90px 1fr 60px; gap: 12px; align-items: center; text-align: left;
+  background: var(--madera); color: var(--cuerda); border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
+.cuerdas button svg { display: block; width: 100%; height: 18px; overflow: visible; }
+.cuerdas button b { font-family: var(--f-mono); text-align: right; }
+
+/* Animaciones de cuerdas: cada nota que suena hace vibrar su cuerda */
+.cv { fill: none; stroke: var(--cuerda); transition: stroke .7s; }
+.cv.suena { stroke: var(--nota); transition: none; }
+.onda { fill: none; stroke: var(--nota); stroke-width: 3; pointer-events: none; transform-box: fill-box; transform-origin: center; animation: onda .6s ease-out forwards; }
+.flota { font: 700 12px var(--f-texto); fill: #fff; text-anchor: middle; pointer-events: none; transform-box: fill-box; animation: flota .9s ease-out forwards; }
+@keyframes onda { from { transform: scale(1); opacity: .9; } to { transform: scale(2.7); opacity: 0; } }
+@keyframes flota { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-24px); opacity: 0; } }
+
+/* Afinador */
+.afinador { display: grid; gap: 8px; max-width: 520px; }
+.af-nota { display: flex; gap: 12px; align-items: baseline; }
+.af-nota strong { font: 800 2.2rem var(--f-titulo); }
+.af-nota span { font-family: var(--f-mono); color: var(--tenue); font-variant-numeric: tabular-nums; }
+.af-medidor { position: relative; height: 34px; border-radius: 8px; background: var(--fondo); border: 1px solid var(--linea); }
+.af-medidor::before { content: ""; position: absolute; left: 45%; width: 10%; top: 0; bottom: 0; background: var(--bien); opacity: .25; }
+.af-medidor i { position: absolute; top: 3px; bottom: 3px; left: 50%; width: 6px; margin-left: -3px; border-radius: 3px; background: var(--tenue); transition: left .12s; }
+.af-medidor.bien i { background: var(--bien); }
+.af-escala { display: flex; justify-content: space-between; font-size: .8rem; color: var(--tenue); }
+#af-msg { font-weight: 700; min-height: 3.1em; }
+
+/* Guitarra del afinador */
+.af-zona { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 20px; align-items: center; }
+@media (max-width: 640px) { .af-zona { grid-template-columns: minmax(0, 1fr); } }
+.af-guitarra svg { display: block; width: 100%; max-width: 320px; margin: 0 auto; }
+.clavija { cursor: pointer; }
+.clavija .perilla { fill: var(--traste); stroke: var(--tinta); stroke-width: 1.5; transition: fill .15s; }
+.clavija:hover .perilla { fill: var(--cuerda); }
+.clavija.lista .perilla { fill: var(--bien); }
+.clavija.activa .perilla { fill: var(--nota); }
+.clavija text { font: 700 14px var(--f-texto); fill: var(--tinta); }
+.clavija .orden { font-size: 11.5px; }
+.clavija.lista .orden { fill: var(--bien); }
+.af-cuerda { stroke: var(--cuerda); fill: none; }
+.af-cuerda.activa { stroke: var(--nota); animation: tiembla .12s linear infinite; }
+@keyframes tiembla { 0%, 100% { transform: translateX(-.8px); } 50% { transform: translateX(.8px); } }
+
+/* Espejo de postura */
+.po-zona { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 640px) { .po-zona { grid-template-columns: minmax(0, 1fr); } }
+.po-video { position: relative; aspect-ratio: 4 / 3; background: var(--madera); border-radius: 12px; overflow: hidden; }
+.po-video video, .po-video canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.po-cuenta { position: absolute; inset: 0; display: grid; place-items: center; font: 800 7rem var(--f-titulo); color: #fff; text-shadow: 0 2px 14px rgba(0, 0, 0, .7); pointer-events: none; }
+.po-panel { display: grid; gap: 12px; }
+.po-panel figure { margin: 0; display: grid; gap: 4px; }
+.po-panel img { max-width: 100%; border-radius: 10px; }
+.po-panel figcaption { font-size: .85rem; color: var(--tenue); }
+#po-msg { font: 600 1.2rem/1.3 var(--f-titulo); min-height: 3.9em; }
+.po-lista { list-style: none; padding: 0; display: grid; gap: 6px; }
+.po-lista li { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 0; padding: 6px 0; border-bottom: 1px solid var(--linea); }
+.po-lista b { font: 700 .8rem var(--f-texto); padding: 2px 10px; border-radius: 999px; background: var(--linea); color: var(--tenue); white-space: nowrap; }
+.po-lista b.ok { background: var(--bien); color: #fff; }
+.po-lista b.mal { background: var(--mal); color: #fff; }
+.po-lista li.grupo { border: 0; padding: 8px 0 0; font: 700 .8rem var(--f-texto); text-transform: uppercase; letter-spacing: .06em; color: var(--tenue); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font: 700 .8rem var(--f-texto); white-space: nowrap; }
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.chip.si { background: color-mix(in srgb, var(--bien) 16%, transparent); color: var(--bien); }
+.chip.no { background: color-mix(in srgb, var(--mal) 16%, transparent); color: var(--mal); }
+.chip.red { background: color-mix(in srgb, var(--nota) 22%, transparent); color: var(--tinta); }
+.chip.red::before { background: var(--nota); }
+.titulo-chips { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+details.conexion { font-size: .9rem; }
+details.conexion summary { cursor: pointer; color: var(--acento); font-weight: 700; }
+details.conexion ul { margin-top: 8px; }
+button:disabled { opacity: .45; cursor: default; }
+
+/* Acordes: la tarjeta se rasguea al tocarla */
+.acordes button.rasga { animation: golpe .35s ease-out; }
+.acordes button.rasga .cs { animation: cuerda-acorde .55s ease-out calc(var(--i) * 45ms) both; }
+.acordes button.rasga .dedo { transform-box: fill-box; transform-origin: center; animation: dedo .4s ease-out; }
+@keyframes golpe { 30% { transform: scale(1.05); } }
+@keyframes cuerda-acorde {
+  0% { stroke: var(--nota); stroke-width: 3px; transform: translateX(1.5px); }
+  20% { transform: translateX(-1.5px); } 40% { transform: translateX(1px); }
+  100% { stroke: var(--tinta); stroke-width: 1px; transform: none; }
+}
+@keyframes dedo { 40% { transform: scale(1.35); } }
+
+/* Ritmo: guitarra con púa */
+.rasgueo svg { display: block; width: 100%; max-width: 620px; height: auto; border-radius: 12px; }
+#r-pua { transition-property: transform; }
+#r-pua path { fill: var(--nota); stroke: #1b1206; stroke-width: 1.5; transition: opacity .1s; }
+#r-pua.aire path { opacity: .35; }
+.compas div.ahora { animation: pulso .2s ease-out; }
+.acorde-actual.cambia { animation: cambia .35s ease-out; }
+@keyframes pulso { 0% { transform: scale(1.15); } }
+@keyframes cambia { 0% { transform: translateY(8px) scale(.9); opacity: .3; } }
+
+/* Taller: las notas saltan y salen volando */
+.secuenciador { position: relative; }
+.secuenciador button.golpe { animation: golpe-celda .4s ease-out; }
+@keyframes golpe-celda { 0% { transform: scale(1.3); box-shadow: 0 0 0 0 var(--nota); } 100% { transform: scale(1); box-shadow: 0 0 0 12px transparent; } }
+.vuela { position: absolute; pointer-events: none; font: 700 1.2rem var(--f-titulo); color: var(--nota); animation: vuela .9s ease-out forwards; }
+@keyframes vuela { from { transform: translate(-50%, 0) rotate(0); opacity: 1; } to { transform: translate(-50%, -44px) rotate(-18deg); opacity: 0; } }
+
+/* Retos que escuchan */
+.reto-txt { font: 600 1.15rem/1.35 var(--f-titulo); min-height: 1.4em; }
+.reto-txt.acierto { color: var(--bien); animation: acierto .45s ease-out; }
+.reto-txt.fallo { color: var(--mal); }
+@keyframes acierto { 30% { transform: scale(1.06); } }
+.boton[aria-pressed="true"] { background: var(--bien); color: #fff; box-shadow: none; }
+
+/* Diapasón */
+.diapason { overflow-x: auto; border-radius: 10px; }
+.diapason svg { display: block; min-width: 660px; width: 100%; height: auto; }
+.pos { cursor: pointer; }
+.pos circle { fill: transparent; transition: fill .15s; }
+.pos text { font: 700 9px var(--f-texto); fill: #1b1206; text-anchor: middle; dominant-baseline: central; opacity: 0; pointer-events: none; }
+.pos:hover circle { fill: rgba(255, 255, 255, .22); }
+/* Nombres visibles: fichas opacas, naturales claras y alteradas oscuras, para leerlas de un vistazo */
+.nombres .pos circle { fill: #efe6cf; stroke: #1b1206; stroke-width: 1; }
+.nombres .pos text { opacity: 1; fill: #1b1206; font-size: 10px; }
+.nombres .pos.sost circle { fill: #5b4436; stroke: #c9b79a; }
+.nombres .pos.sost text { fill: #fff6e3; font-size: 8.5px; letter-spacing: -.3px; }
+.nombres .pos:hover circle { fill: var(--nota); }
+.nombres .pos:hover text { fill: #1b1206; }
+.pos.on circle { fill: var(--nota); }
+.pos.on.tonica circle { fill: var(--tonica); }
+.pos.on text, .pos.flash text { opacity: 1; fill: #1b1206; }
+.pos.flash circle { fill: #ffffff; }
+
+/* Tablatura */
+pre { margin: 0; font: 400 .88rem/1.35 var(--f-mono); background: var(--fondo); border: 1px solid var(--linea); border-radius: 10px; padding: 14px; overflow-x: auto; }
+
+/* Acordes */
+.acordes { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.acordes button { background: var(--fondo); border: 1px solid var(--linea); border-radius: 12px; padding: 10px 6px; cursor: pointer; display: grid; justify-items: center; gap: 2px; }
+.acordes button:hover { border-color: var(--acento); }
+.acordes strong { font: 800 1.3rem var(--f-titulo); }
+.acordes small { color: var(--tenue); }
+.acordes svg { width: 100px; height: 120px; }
+.acordes line { stroke: var(--tinta); }
+.acordes .dedo { fill: var(--acento); }
+.acordes .dn { fill: var(--sobre-acento); font: 700 10px var(--f-texto); text-anchor: middle; dominant-baseline: central; }
+.acordes .marca { fill: var(--tenue); font: 700 11px var(--f-texto); text-anchor: middle; }
+
+/* Ritmo */
+.compas { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; max-width: 520px; }
+.compas div { display: grid; justify-items: center; padding: 8px 0; border-radius: 8px; border: 1px solid var(--linea); font-family: var(--f-mono); }
+.compas div b { font-size: 1.5rem; line-height: 1.1; min-height: 1.1em; }
+.compas div small { color: var(--tenue); }
+.compas div.ahora { background: var(--nota); color: #1b1206; border-color: var(--nota); }
+.compas div.ahora small { color: #1b1206; }
+.acorde-actual { font: 800 2.6rem var(--f-titulo); min-width: 3ch; }
+.progresion { display: flex; gap: 8px; font: 600 1.1rem var(--f-titulo); color: var(--tenue); }
+.progresion .ahora { color: var(--tinta); text-decoration: underline 3px var(--nota); text-underline-offset: 5px; }
+
+/* Secuenciador */
+.sec-envoltura { overflow-x: auto; }
+.secuenciador { display: grid; grid-template-columns: 52px repeat(16, minmax(30px, 1fr)); gap: 3px; min-width: 600px; }
+.secuenciador .eti { font: 700 .8rem var(--f-mono); display: grid; align-items: center; color: var(--tenue); }
+.secuenciador .ac { grid-column: span 4; font: 600 .95rem var(--f-titulo); padding: 2px 6px; border-left: 3px solid var(--linea); color: var(--tenue); }
+.secuenciador button { height: 30px; border: 0; border-radius: 6px; background: var(--fondo); box-shadow: inset 0 0 0 1px var(--linea); cursor: pointer; padding: 0; }
+.secuenciador button.t { background: var(--linea); }            /* inicio de cada tiempo */
+.secuenciador button.on { background: var(--nota); box-shadow: none; }
+.secuenciador button.raiz.on { background: var(--tonica); }
+.secuenciador button.col { box-shadow: inset 0 0 0 2px var(--acento); }
+
+.lista-ok { list-style: none; padding: 0; display: grid; gap: 8px; }
+.lista-ok label { align-items: start; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+th { color: var(--tenue); font-weight: 700; }
+.tabla { overflow-x: auto; }
+dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; max-width: 65ch; }
+dt { font-weight: 700; } dd { margin: 0; color: var(--tenue); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="pagina">
+<header>
+  <div>
+    <h1>Guitarra desde cero</h1>
+    <p>Seis niveles, de afinar la guitarra a componer tu primera melodía. Todo lo que ves suena al tocarlo.</p>
+    <details class="conexion">
+      <summary>¿Qué funciona sin internet?</summary>
+      <ul>
+        <li><strong>Instálala como app</strong> con el botón «Instalar app» (Chrome, Edge, Android) o, en iPhone, con Compartir → «Agregar a inicio». Instalada abre sin internet.</li>
+        <li><strong>Sin internet:</strong> las seis lecciones, el sonido, los acordes, la máquina de rasgueo, las escalas, el taller de melodías, el afinador y los retos que escuchan tu guitarra.</li>
+        <li><strong>Necesita internet la primera vez:</strong> el espejo de postura baja sus modelos de visión (unos 20 MB). En la app instalada quedan guardados y después funciona sin internet.</li>
+        <li><strong>Micrófono y cámara:</strong> funcionan en la app o en el navegador, pero no dentro de Claude.</li>
+        <li>Sin internet las letras se ven con la tipografía de tu sistema; todo lo demás se ve igual.</li>
+      </ul>
+    </details>
+  </div>
+  <div class="ajustes">
+    <label for="notacion">Nombres de notas
+      <select id="notacion"><option value="es">Do Re Mi</option><option value="en">C D E</option></select>
+    </label>
+    <button class="boton sec" id="instalar" type="button" hidden>Instalar app</button>
+    <span class="chip si" id="conexion" aria-live="polite">Con internet</span>
+    <div class="avance" aria-label="Avance total"><i><b id="barra"></b></i><span id="avance-txt">0 de 18</span></div>
+  </div>
+</header>
+
+<div class="cuerpo">
+<nav id="indice" aria-label="Niveles"></nav>
+
+<main>
+<!-- NIVEL 1 -->
+<section data-vista="guitarra">
+  <h2>Nivel 1 · Conoce tu guitarra</h2>
+  <p class="intro">Antes de tocar una sola nota necesitas tres cosas: saber cómo se llaman las cuerdas, afinarlas y sentarte sin tensión.</p>
+  <div class="tarjeta">
+    <h3>Las seis cuerdas al aire</h3>
+    <p>Se cuentan de la más delgada (1ª) a la más gruesa (6ª). Toca cada una aquí y compárala con la tuya: gira la clavija hasta que suenen igual. O usa el afinador con micrófono de abajo.</p>
+    <div class="cuerdas" id="cuerdas"></div>
+    <p>Para memorizarlas de 6ª a 1ª: <strong>Mi, La, Re, Sol, Si, Mi</strong>.</p>
+  </div>
+  <div class="tarjeta">
+    <div class="titulo-chips"><h3>Afinador con micrófono</h3><span class="chip si">Funciona sin internet</span></div>
+    <p>Activa el micrófono, toca <strong>una sola cuerda al aire</strong> y déjala sonar. El afinador reconoce qué cuerda es y te dice si aprietas o aflojas su clavija. Gira poco a poco: una cuerda demasiado tensa se rompe.</p>
+    <div class="fila">
+      <button class="boton" id="af-btn" type="button">Activar micrófono</button>
+      <label for="af-cuerda">Cuerda
+        <select id="af-cuerda"><option value="0">Detectar sola</option><option value="6">6ª</option><option value="5">5ª</option><option value="4">4ª</option><option value="3">3ª</option><option value="2">2ª</option><option value="1">1ª</option></select>
+      </label>
+    </div>
+    <div class="af-zona">
+    <div class="af-guitarra" id="af-guitarra"></div>
+    <div class="afinador">
+      <div class="af-nota"><strong id="af-nota">–</strong><span id="af-hz"></span></div>
+      <div class="af-medidor" id="af-medidor"><i id="af-aguja"></i></div>
+      <div class="af-escala"><span>grave</span><span>afinada</span><span>aguda</span></div>
+      <p id="af-msg">El audio se analiza en tu navegador; no se graba ni se envía a ningún lado.</p>
+      <p class="lectura" id="af-cuenta">Cuerdas afinadas: 0 de 6</p>
+    </div>
+    </div>
+    <p>La guitarra muestra qué clavija mover. Toca una clavija para elegir esa cuerda y, con el micrófono apagado, escuchar cómo debe sonar.</p>
+    <p>Si una cuerda está muy lejos de su nota, elígela a mano en la lista para que el afinador no la confunda con la vecina.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Partes que vas a nombrar todo el tiempo</h3>
+    <dl>
+      <dt>Clavijas</dt><dd>Tensan o aflojan cada cuerda para afinarla.</dd>
+      <dt>Cejuela</dt><dd>La barrita donde empieza el diapasón. Cuerda sin pisar = traste 0.</dd>
+      <dt>Trastes</dt><dd>Las barras de metal. Cada traste sube la nota medio tono.</dd>
+      <dt>Diapasón</dt><dd>La cara del mástil donde pisas las cuerdas.</dd>
+      <dt>Boca y puente</dt><dd>Sobre la boca rasgueas; en el puente terminan las cuerdas.</dd>
+    </dl>
+  </div>
+  <div class="tarjeta">
+    <h3>Postura y manos</h3>
+    <ul>
+      <li>Siéntate derecho, guitarra sobre la pierna derecha, el mástil apuntando un poco hacia arriba.</li>
+      <li>Mano izquierda: pulgar detrás del mástil, dedos curvos, pisa con la yema <strong>pegado al traste</strong> (no encima, no en medio).</li>
+      <li>Mano derecha: toca con el pulgar o con una púa mediana. Muñeca suelta.</li>
+      <li>Las yemas duelen las primeras dos semanas. Practica 15 minutos diarios en vez de dos horas el sábado.</li>
+    </ul>
+  </div>
+  <div class="tarjeta">
+    <div class="titulo-chips"><h3>Espejo de postura</h3><span class="chip red">Necesita internet o la versión sin internet</span></div>
+    <p>Pon la cámara de frente, a un metro y medio, de modo que se vean tu cabeza, tus hombros, tu cadera y tus dos manos sobre la guitarra. Activa la cámara y recibirás una corrección a la vez: primero el cuerpo, después las manos. El video se analiza en tu navegador y no se graba ni se envía.</p>
+    <div class="fila">
+      <button class="boton" id="po-btn" type="button">Activar cámara</button>
+      <button class="boton sec" id="po-ref" type="button" disabled>Tomar otra foto</button>
+      <label for="po-con-manos"><input type="checkbox" id="po-con-manos" checked> Revisar manos</label>
+      <label for="po-zurdo"><input type="checkbox" id="po-zurdo"> Soy zurdo</label>
+    </div>
+    <div class="po-zona">
+      <div class="po-video"><video id="po-video" playsinline muted></video><canvas id="po-lienzo"></canvas><div class="po-cuenta" id="po-cuenta" aria-live="polite"></div></div>
+      <div class="po-panel">
+        <p id="po-msg">Activa la cámara para empezar.</p>
+        <p class="lectura" id="po-verdes" aria-live="polite"></p>
+        <p class="lectura" id="po-origen"></p>
+        <ul class="po-lista" id="po-lista"></ul>
+        <figure id="po-figura" hidden><img id="po-foto" alt="Foto de tu postura de referencia"><figcaption>Tu postura de referencia. Desde ahora te comparo con ella.</figcaption></figure>
+      </div>
+    </div>
+    <p>No tienes que tocar nada: cuando <strong>todas</strong> las revisiones están en verde aparece un contador de 3 segundos; si alguna se pone en rojo o deja de verse, el contador se cancela. Quédate quieto y la página toma la foto sola; esa pose queda como tu referencia y la revisión se ajusta a tu cuerpo. La foto se queda en esta página y se borra al cerrarla.</p>
+    <p>Las revisiones de manos son aproximadas: la guitarra tapa parte de la mano que pisa y la cámara ve en dos dimensiones. Si una indicación no corresponde con lo que haces, confía en tu maestro o en un espejo. El pulgar detrás del mástil y el dedo pegado al traste no se alcanzan a ver con una cámara normal.</p>
+  </div>
+</section>
+
+<!-- NIVEL 2 -->
+<section data-vista="notas">
+  <h2>Nivel 2 · Tus primeras notas</h2>
+  <p class="intro">El diapasón es un mapa. Cada cruce de cuerda y traste es una nota, y la tablatura es la forma más rápida de leer ese mapa.</p>
+  <div class="tarjeta">
+    <h3>Explora el diapasón</h3>
+    <p>Toca cualquier punto. La 1ª cuerda está arriba, igual que en una tablatura. La columna de la izquierda son las cuerdas al aire.</p>
+    <div class="diapason" id="dp-notas"></div>
+    <div class="fila">
+      <label for="ver-nombres"><input type="checkbox" id="ver-nombres"> Ver nombres de las notas</label>
+      <span class="lectura" id="lectura-notas">Toca una nota para ver cuál es.</span>
+    </div>
+  </div>
+  <div class="tarjeta">
+    <div class="titulo-chips"><h3>Reto: encuentra la nota</h3><span class="chip si">Funciona sin internet</span></div>
+    <p>Hay 12 notas y se repiten por todo el mástil. Empieza por las siete naturales. Responde tocando el diapasón o, mejor, con tu guitarra: activa el micrófono, toca la nota y déjala sonar.</p>
+    <div class="fila">
+      <button class="boton" id="reto-btn" type="button">Empezar reto</button>
+      <button class="boton sec" id="reto-mic" type="button" aria-pressed="false">Responder con mi guitarra</button>
+    </div>
+    <p class="reto-txt" id="reto-txt" aria-live="polite"></p>
+    <p class="lectura" id="reto-oido"></p>
+  </div>
+  <div class="tarjeta">
+    <h3>Cómo leer tablatura</h3>
+    <p>Seis líneas, una por cuerda (la de arriba es la 1ª). El número indica el traste que pisas; 0 es cuerda al aire. Se lee de izquierda a derecha.</p>
+    <pre aria-label="Tablatura del Himno a la alegría">Himno a la alegría (Beethoven)
+e|-0-0-1-3-|-3-1-0---|-------0-|-0-------|
+B|---------|-------3-|-1-1-3---|---3-3---|
+G|---------|---------|---------|---------|
+D|---------|---------|---------|---------|
+A|---------|---------|---------|---------|
+E|---------|---------|---------|---------|</pre>
+    <div class="fila">
+      <button class="boton" id="himno-btn" type="button">Escuchar y ver en el diapasón</button>
+      <button class="boton sec" id="himno-mic" type="button" aria-pressed="false">Tocarla con mi guitarra</button>
+    </div>
+    <p class="reto-txt" id="himno-txt" aria-live="polite"></p>
+    <p>Usa un dedo por traste: índice en el 1, anular en el 3. Tócala lento hasta que salga sin pausas.</p>
+  </div>
+</section>
+
+<!-- NIVEL 3 -->
+<section data-vista="acordes">
+  <h2>Nivel 3 · Acordes abiertos</h2>
+  <p class="intro">Un acorde son varias notas a la vez. Con estos ocho puedes acompañar miles de canciones.</p>
+  <div class="tarjeta">
+    <h3>Toca cada diagrama para escucharlo</h3>
+    <p>El diagrama es el mástil visto de frente: la 6ª cuerda a la izquierda. Los números son dedos (1 índice, 2 medio, 3 anular, 4 meñique). <strong>○</strong> cuerda al aire, <strong>×</strong> cuerda que no se toca.</p>
+    <div class="acordes" id="acordes"></div>
+  </div>
+  <div class="tarjeta">
+    <h3>Cómo practicarlos</h3>
+    <ol>
+      <li>Empieza con <strong>Em</strong> y <strong>Am</strong>: son los más fáciles.</li>
+      <li>Arma el acorde y toca cuerda por cuerda. Si una suena apagada, curva más el dedo o acércalo al traste.</li>
+      <li>Cambios de un minuto: elige dos acordes (Em↔Am, luego G↔C, luego C↔D) y cuenta cuántos cambios limpios haces en 60 segundos. Anótalo cada día.</li>
+      <li>Busca dedos que no se mueven entre acordes. De C a Am solo cambia el anular.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- NIVEL 4 -->
+<section data-vista="ritmo">
+  <h2>Nivel 4 · Ritmo y rasgueo</h2>
+  <p class="intro">Un acorde limpio fuera de tiempo suena peor que un acorde sucio a tiempo. El ritmo manda.</p>
+  <div class="tarjeta">
+    <h3>Máquina de rasgueo</h3>
+    <p>Tu mano derecha sube y baja siempre, como péndulo: baja en los números, sube en las «y». Donde no hay flecha la mano se mueve igual, pero sin tocar las cuerdas.</p>
+    <div class="fila">
+      <label for="r-prog">Progresión <select id="r-prog"></select></label>
+      <label for="r-patron">Patrón <select id="r-patron"></select></label>
+    </div>
+    <div class="fila">
+      <span class="acorde-actual" id="r-acorde">G</span>
+      <div class="progresion" id="r-lista"></div>
+    </div>
+    <div class="rasgueo" id="r-guitarra" aria-hidden="true"></div>
+    <div class="compas" id="r-compas"></div>
+    <div class="fila">
+      <button class="boton" id="r-btn" type="button">Reproducir</button>
+      <label for="r-bpm">Tempo <input type="range" id="r-bpm" min="50" max="140" value="80"> <output id="r-bpm-o">80</output></label>
+      <label for="r-metro"><input type="checkbox" id="r-metro" checked> Metrónomo</label>
+    </div>
+  </div>
+  <div class="tarjeta">
+    <h3>Orden para dominarlo</h3>
+    <ol>
+      <li>Apaga las cuerdas con la mano izquierda y practica solo el patrón, contando en voz alta «1 y 2 y 3 y 4 y».</li>
+      <li>Agrega un solo acorde. Luego dos.</li>
+      <li>Empieza a 60 y sube de 5 en 5 solo cuando salga tres veces seguidas sin error.</li>
+      <li>Si el cambio de acorde te atrasa, cambia antes: la mano derecha nunca se detiene.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- NIVEL 5 -->
+<section data-vista="escalas">
+  <h2>Nivel 5 · Escalas</h2>
+  <p class="intro">Una escala es la paleta de notas que suenan bien juntas. De aquí salen las melodías.</p>
+  <div class="tarjeta">
+    <h3>Tres escalas para empezar</h3>
+    <div class="fila">
+      <label for="e-sel">Escala <select id="e-sel"></select></label>
+      <button class="boton" id="e-btn" type="button">Escuchar subiendo y bajando</button>
+    </div>
+    <div class="diapason" id="dp-escalas"></div>
+    <p id="e-desc"></p>
+    <p>El punto <strong style="color:var(--tonica)">rojo</strong> es la tónica: la nota «casa», donde la melodía descansa.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Improvisa por primera vez</h3>
+    <p>Elige la pentatónica de La menor, enciende el acompañamiento y toca las notas marcadas en cualquier orden, aquí o en tu guitarra. No hay notas equivocadas dentro de la escala. Prueba terminar tus frases en La.</p>
+    <div class="fila"><button class="boton sec" id="e-acomp" type="button">Acompañamiento en La menor</button></div>
+  </div>
+</section>
+
+<!-- NIVEL 6 -->
+<section data-vista="melodia">
+  <h2>Nivel 6 · Crea tu melodía</h2>
+  <p class="intro">Ya tienes notas, ritmo y escala. Componer es elegir pocas notas y repetirlas con intención.</p>
+  <div class="tarjeta">
+    <h3>Taller de melodías</h3>
+    <p>Cada columna es una corchea; cada fila, una nota de la pentatónica de La menor. Marca una nota por columna y deja huecos: los silencios también son música.</p>
+    <div class="sec-envoltura"><div class="secuenciador" id="seq"></div></div>
+    <div class="fila">
+      <button class="boton" id="m-btn" type="button">Reproducir</button>
+      <button class="boton sec" id="m-azar" type="button">Idea al azar</button>
+      <button class="boton sec" id="m-borrar" type="button">Borrar</button>
+      <label for="m-bpm">Tempo <input type="range" id="m-bpm" min="60" max="140" value="96"> <output id="m-bpm-o">96</output></label>
+      <label for="m-acomp"><input type="checkbox" id="m-acomp" checked> Acordes de fondo</label>
+    </div>
+    <h3>Tu melodía en tablatura</h3>
+    <pre id="m-tab"></pre>
+    <div class="fila"><button class="boton sec" id="m-copiar" type="button">Copiar tablatura</button><span class="lectura" id="m-copiado" aria-live="polite"></span></div>
+  </div>
+  <div class="tarjeta">
+    <h3>Seis reglas que funcionan</h3>
+    <ol>
+      <li><strong>Empieza con un motivo:</strong> tres o cuatro notas con un ritmo claro.</li>
+      <li><strong>Repite y cambia el final.</strong> La repetición hace que se recuerde; el cambio evita que aburra.</li>
+      <li><strong>Pregunta y respuesta:</strong> el primer compás termina «en el aire» (en Sol o Re); el segundo regresa a La.</li>
+      <li><strong>Muévete por notas vecinas</strong> y usa los saltos grandes como condimento.</li>
+      <li><strong>Deja silencios.</strong> Una melodía sin pausas no respira.</li>
+      <li><strong>Cántala.</strong> Si puedes tararearla, es una melodía. Si no, simplifica.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section data-vista="plan">
+  <h2>Plan de 8 semanas</h2>
+  <p class="intro">Con 15 a 20 minutos diarios. Avanza cuando marques todos los objetivos del nivel, no cuando lo diga el calendario.</p>
+  <div class="tarjeta tabla">
+    <table>
+      <thead><tr><th>Semana</th><th>Nivel</th><th>Sesión diaria</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>1 y 2</td><td>Afinar (2 min) · notas en las cuerdas 1ª y 2ª (8 min) · Himno a la alegría (5 min)</td></tr>
+        <tr><td>2</td><td>2 y 3</td><td>Reto de notas (5 min) · Em y Am cuerda por cuerda (10 min)</td></tr>
+        <tr><td>3</td><td>3</td><td>C, G y D · cambios de un minuto con dos parejas de acordes</td></tr>
+        <tr><td>4</td><td>3 y 4</td><td>E, A y Dm · negras con metrónomo a 60–70</td></tr>
+        <tr><td>5</td><td>4</td><td>Patrón «abajo, abajo-arriba, arriba-abajo-arriba» · una progresión de cuatro acordes</td></tr>
+        <tr><td>6</td><td>5</td><td>Pentatónica de La menor con púa alternada · sigue rasgueando 5 min</td></tr>
+        <tr><td>7</td><td>5 y 6</td><td>Improvisar sobre el acompañamiento · escribir motivos de 3–4 notas</td></tr>
+        <tr><td>8</td><td>6</td><td>Componer una melodía de 2 compases, pasarla a tu guitarra y grabarte</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="tarjeta" id="objetivos-caja" style="margin-top:20px">
+  <h3>Objetivos de este nivel</h3>
+  <ul class="lista-ok" id="objetivos"></ul>
+</div>
+</main>
+</div>
+</div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+// ---------- Datos ----------
+const AFINACION = [64, 59, 55, 50, 45, 40];            // MIDI de las cuerdas 1ª a 6ª al aire
+const NOTAS = {
+  es: ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+  en: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+};
+const ORDINAL = ['', '1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
+const NIVELES = [
+  { id: 'guitarra', n: '1', titulo: 'Tu guitarra', metas: ['Sé de memoria las seis cuerdas al aire', 'Mi guitarra está afinada', 'Me siento sin tensión en hombros ni muñeca'] },
+  { id: 'notas', n: '2', titulo: 'Primeras notas', metas: ['Leo una tablatura sencilla', 'Toco el Himno a la alegría sin pausas', 'Acerté 5 notas seguidas en el reto'] },
+  { id: 'acordes', n: '3', titulo: 'Acordes', metas: ['Em, Am, C, G y D me suenan limpios cuerda por cuerda', 'Cambio de acorde sin mirar la mano derecha', 'Hago 30 cambios limpios en un minuto'] },
+  { id: 'ritmo', n: '4', titulo: 'Ritmo', metas: ['Mantengo negras con el metrónomo a 70', 'Toco el patrón universal sin detener la mano', 'Toco una progresión de 4 acordes completa'] },
+  { id: 'escalas', n: '5', titulo: 'Escalas', metas: ['Toco la pentatónica de La menor subiendo y bajando', 'Sé dónde están las tónicas', 'Improvisé un minuto sobre el acompañamiento'] },
+  { id: 'melodia', n: '6', titulo: 'Tu melodía', metas: ['Escribí un motivo de 3 o 4 notas', 'Compuse 2 compases que terminan en La', 'Toqué mi melodía en la guitarra leyendo la tablatura'] },
+  { id: 'plan', n: '★', titulo: 'Plan de práctica', metas: [] },
+];
+// Trastes de la 6ª a la 1ª cuerda (-1 = no se toca) y dedos
+const ACORDES = {
+  Em: { es: 'Mi menor', t: [0, 2, 2, 0, 0, 0], d: [0, 2, 3, 0, 0, 0] },
+  Am: { es: 'La menor', t: [-1, 0, 2, 2, 1, 0], d: [0, 0, 2, 3, 1, 0] },
+  C:  { es: 'Do mayor', t: [-1, 3, 2, 0, 1, 0], d: [0, 3, 2, 0, 1, 0] },
+  G:  { es: 'Sol mayor', t: [3, 2, 0, 0, 0, 3], d: [2, 1, 0, 0, 0, 3] },
+  D:  { es: 'Re mayor', t: [-1, -1, 0, 2, 3, 2], d: [0, 0, 0, 1, 3, 2] },
+  E:  { es: 'Mi mayor', t: [0, 2, 2, 1, 0, 0], d: [0, 2, 3, 1, 0, 0] },
+  A:  { es: 'La mayor', t: [-1, 0, 2, 2, 2, 0], d: [0, 0, 1, 2, 3, 0] },
+  Dm: { es: 'Re menor', t: [-1, -1, 0, 2, 3, 1], d: [0, 0, 0, 2, 3, 1] },
+};
+const PROGRESIONES = [['G', 'D', 'Em', 'C'], ['Em', 'C', 'G', 'D'], ['C', 'Am', 'Dm', 'G'], ['A', 'D', 'E', 'A'], ['Am', 'C', 'G', 'Em']];
+const PATRONES = {
+  'Negras: ↓ ↓ ↓ ↓': 'D.D.D.D.',
+  'Corcheas: ↓↑ ↓↑ ↓↑ ↓↑': 'DUDUDUDU',
+  'Universal: ↓ ↓↑ ↑↓↑': 'D.DU.UDU',
+  'Balada: ↓ ↓ ↓↑ ↓↑': 'D.D.DUDU',
+};
+// Posiciones por cuerda (1ª a 6ª)
+const ESCALAS = {
+  'La menor pentatónica (caja 1)': { tonica: 9, pos: [[5, 8], [5, 8], [5, 7], [5, 7], [5, 7], [5, 8]],
+    desc: 'Cinco notas: La, Do, Re, Mi, Sol. Dos por cuerda, entre los trastes 5 y 8. Índice en el 5, anular en el 7, meñique en el 8. Es la escala más usada en rock, blues y pop.' },
+  'Mi menor pentatónica (abierta)': { tonica: 4, pos: [[0, 3], [0, 3], [0, 2], [0, 2], [0, 2], [0, 3]],
+    desc: 'La misma forma que la anterior, pero con cuerdas al aire. La más cómoda para empezar: Mi, Sol, La, Si, Re.' },
+  'Do mayor (posición abierta)': { tonica: 0, pos: [[0, 1, 3], [0, 1, 3], [0, 2], [0, 2, 3], [3], []],
+    desc: 'Las siete notas naturales: Do, Re, Mi, Fa, Sol, La, Si. Un dedo por traste. Es el «do re mi» de toda la vida.' },
+};
+// Filas del taller (aguda arriba): pentatónica de La menor en la caja 1
+const FILAS = [{ c: 1, t: 8 }, { c: 1, t: 5 }, { c: 2, t: 8 }, { c: 2, t: 5 }, { c: 3, t: 7 }, { c: 3, t: 5 }, { c: 4, t: 7 }, { c: 4, t: 5 }];
+const FONDO = ['Am', 'C', 'G', 'Em'];
+
+let notacion = 'es';
+const midiDe = (c, t) => AFINACION[c - 1] + t;
+const nombre = m => NOTAS[notacion][m % 12];
+const guardar = (k, v) => { try { localStorage.setItem('guitarra-' + k, JSON.stringify(v)); } catch (e) {} };
+const leer = (k, def) => { try { return JSON.parse(localStorage.getItem('guitarra-' + k)) ?? def; } catch (e) { return def; } };
+
+// ---------- Sonido: cuerda pulsada (Karplus-Strong) ----------
+let ctx, salida;
+const buffers = new Map(), sonando = {};
+function audio() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    salida = ctx.createDynamicsCompressor();
+    salida.connect(ctx.destination);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+function bufferDe(midi) {
+  if (buffers.has(midi)) return buffers.get(midi);
+  const sr = ctx.sampleRate, f = 440 * 2 ** ((midi - 69) / 12), n = Math.round(sr / f);
+  const buf = ctx.createBuffer(1, sr * 2, sr), d = buf.getChannelData(0), anillo = new Float32Array(n);
+  for (let i = 0; i < n; i++) anillo[i] = Math.random() * 2 - 1;
+  for (let i = 1; i < n; i++) anillo[i] = (anillo[i] + anillo[i - 1]) / 2;
+  for (let i = 0; i < d.length; i++) {
+    const j = i % n;
+    d[i] = anillo[j];
+    anillo[j] = 0.997 * (anillo[j] + anillo[(j + 1) % n]) / 2;
+  }
+  const dato = { buf, afinado: f * n / sr };          // corrige el redondeo de n
+  buffers.set(midi, dato);
+  return dato;
+}
+function tocar(c, t, cuando, vol = 0.6, voz = '') {
+  try {
+    const a = audio(), ini = cuando ?? a.currentTime, { buf, afinado } = bufferDe(midiDe(c, t));
+    const src = a.createBufferSource(), g = a.createGain();
+    src.buffer = buf; src.playbackRate.value = afinado; g.gain.value = vol;
+    src.connect(g).connect(salida);
+    const previa = sonando[voz + c];                    // una cuerda solo suena una nota a la vez
+    if (previa) previa.gain.setTargetAtTime(0, ini, 0.01);
+    sonando[voz + c] = g;
+    src.start(ini);
+    alSonar(ini, () => pulsos.forEach(f => f(c, t, vol, voz)));
+  } catch (e) {}
+}
+function rasguear(nom, cuando, abajo = true, vol = 0.32, voz = '') {
+  const t = ACORDES[nom].t, ini = cuando ?? audio().currentTime;
+  let cs = [6, 5, 4, 3, 2, 1].filter(c => t[6 - c] >= 0);
+  if (!abajo) cs = cs.slice(-4).reverse();
+  cs.forEach((c, i) => tocar(c, t[6 - c], ini + i * (abajo ? 0.018 : 0.012), abajo ? vol : vol * 0.7, voz));
+}
+function clic(t, fuerte) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = fuerte ? 1500 : 1000;
+  g.gain.setValueAtTime(0.12, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  o.connect(g).connect(salida); o.start(t); o.stop(t + 0.05);
+}
+const alSonar = (t, fn) => setTimeout(fn, Math.max(0, (t - ctx.currentTime) * 1000));
+
+// Reloj en corcheas con planificación adelantada
+const relojes = [], botones = [];
+function reloj(bpm, alPaso, alParar) {
+  let paso = 0, sig = 0, id = null;
+  const r = {
+    get activo() { return id !== null; },
+    iniciar() { audio(); paso = 0; sig = ctx.currentTime + 0.06; id = setInterval(r.tick, 25); },
+    tick() { while (sig < ctx.currentTime + 0.1) { alPaso(paso++, sig); sig += 30 / bpm(); } },
+    parar() { if (id !== null) { clearInterval(id); id = null; if (alParar) alParar(); } },
+  };
+  relojes.push(r);
+  return r;
+}
+function pararTodo() {
+  relojes.forEach(r => r.parar());
+  botones.forEach(([b, e]) => { b.textContent = e; b.setAttribute('aria-pressed', 'false'); });
+}
+function conmutador(btn, r) {
+  botones.push([btn, btn.textContent]);
+  btn.setAttribute('aria-pressed', 'false');
+  btn.addEventListener('click', () => {
+    const estaba = r.activo;
+    pararTodo();
+    if (!estaba) { r.iniciar(); btn.textContent = 'Detener'; btn.setAttribute('aria-pressed', 'true'); }
+  });
+}
+
+// ---------- Animación: cuerdas que vibran ----------
+// Cada nota avisa a quien escucha en "pulsos"; la cuerda dibuja una onda que se apaga.
+const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+const pulsos = [], vibrando = new Set(), NS = 'http://www.w3.org/2000/svg';
+let rafCuerdas = 0;
+function vibrar(path, g, vol, c) {
+  if (!path) return;
+  path.classList.add('suena');
+  path._v = { ...g, a: g.amp * Math.min(1, vol * 1.6), f: 5 + (7 - c) * 1.3, t0: performance.now() };
+  if (quieto.matches) { setTimeout(() => path.classList.remove('suena'), 400); return; }
+  vibrando.add(path);
+  rafCuerdas ||= requestAnimationFrame(animarCuerdas);
+}
+function animarCuerdas(ahora) {
+  for (const p of vibrando) {
+    const v = p._v, t = (ahora - v.t0) / 1000, a = v.a * Math.exp(-t * 2.6) * Math.cos(t * 2 * Math.PI * v.f);
+    let d = `M${v.inicio},${v.y} L${v.x0},${v.y}`;
+    for (let i = 1; i <= 24; i++) d += ` L${(v.x0 + (v.x1 - v.x0) * i / 24).toFixed(1)},${(v.y + a * Math.sin(Math.PI * i / 24)).toFixed(2)}`;
+    p.setAttribute('d', d);
+    if (t > 1.6) { p.setAttribute('d', `M${v.inicio},${v.y} L${v.x1},${v.y}`); p.classList.remove('suena'); vibrando.delete(p); }
+  }
+  rafCuerdas = vibrando.size ? requestAnimationFrame(animarCuerdas) : 0;
+}
+function efecto(svg, tag, attrs, texto) {                           // onda o nombre que flota y desaparece
+  if (quieto.matches) return;
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (texto) e.textContent = texto;
+  e.addEventListener('animationend', () => e.remove());
+  svg.append(e);
+}
+const reiniciar = (el, clase) => { el.classList.remove(clase); void el.getBoundingClientRect(); el.classList.add(clase); };
+
+// ---------- Diapasón ----------
+const X = t => t === 0 ? 26 : 52 + (t - 0.5) * 54, Y = c => 24 + (c - 1) * 28;
+function diapason(caja, alTocar) {
+  let s = `<svg viewBox="0 0 712 200" role="group" aria-label="Diapasón de guitarra, trastes 0 a 12">
+    <rect width="712" height="176" rx="8" fill="var(--madera)"/><rect width="50" height="176" rx="8" fill="#000" opacity=".28"/>
+    <rect x="49" width="6" height="176" fill="#efe6cf"/>`;
+  for (let t = 1; t <= 12; t++) s += `<rect x="${52 + t * 54 - 1.5}" width="3" height="176" fill="var(--traste)"/>`;
+  [3, 5, 7, 9].forEach(t => s += `<circle cx="${X(t)}" cy="94" r="6" fill="#fff" opacity=".13"/>`);
+  s += `<circle cx="${X(12)}" cy="66" r="6" fill="#fff" opacity=".13"/><circle cx="${X(12)}" cy="122" r="6" fill="#fff" opacity=".13"/>`;
+  for (let c = 1; c <= 6; c++) s += `<path class="cv" data-c="${c}" d="M0,${Y(c)} L712,${Y(c)}" stroke-width="${0.9 + c * 0.35}"/>`;
+  for (let t = 0; t <= 12; t++) s += `<text x="${X(t)}" y="193" text-anchor="middle" font-size="11" fill="var(--tenue)" font-family="var(--f-mono)">${t}</text>`;
+  for (let c = 1; c <= 6; c++) for (let t = 0; t <= 12; t++)
+    s += `<g class="pos${[1, 3, 6, 8, 10].includes(midiDe(c, t) % 12) ? ' sost' : ''}" data-c="${c}" data-t="${t}"><circle cx="${X(t)}" cy="${Y(c)}" r="13"/><text x="${X(t)}" y="${Y(c)}" data-midi="${midiDe(c, t)}"></text></g>`;
+  caja.innerHTML = s + '</svg>';
+  const en = (c, t) => $(`.pos[data-c="${c}"][data-t="${t}"]`, caja);
+  const api = {
+    flash(c, t) { const g = en(c, t); g.classList.add('flash'); setTimeout(() => g.classList.remove('flash'), 280); },
+    marcar(pos, tonica) {
+      $$('.pos', caja).forEach(g => g.classList.remove('on', 'tonica'));
+      pos.forEach((ts, i) => ts.forEach(t => {
+        const g = en(i + 1, t); if (!g) return; g.classList.add('on');
+        if (midiDe(i + 1, t) % 12 === tonica) g.classList.add('tonica');
+      }));
+    },
+  };
+  caja.addEventListener('click', e => {
+    const g = e.target.closest('.pos'); if (!g) return;
+    const c = +g.dataset.c, t = +g.dataset.t;
+    tocar(c, t);
+    if (alTocar) alTocar(c, t);
+  });
+  api.destello = (c, t, vol = 0.6) => {
+    const svg = $('svg', caja);
+    api.flash(c, t);
+    vibrar($(`.cv[data-c="${c}"]`, caja), { inicio: 0, x0: 52 + t * 54, x1: 712, y: Y(c), amp: 6 }, vol, c);
+    efecto(svg, 'circle', { class: 'onda', cx: X(t), cy: Y(c), r: 12 });
+    efecto(svg, 'text', { class: 'flota', x: X(t), y: Y(c) - 16 }, nombre(midiDe(c, t)));
+  };
+  pulsos.push((c, t, vol, voz) => { if (!voz && caja.offsetParent) api.destello(c, t, vol); });   // el acompañamiento no se dibuja
+  return api;
+}
+const ponerNombres = () => $$('[data-midi]').forEach(e => e.textContent = nombre(+e.dataset.midi));
+
+// ---------- Nivel 1: cuerdas al aire ----------
+$('#cuerdas').innerHTML = [6, 5, 4, 3, 2, 1].map(c =>
+  `<button type="button" data-c="${c}"><span>${ORDINAL[c]} cuerda</span><svg viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path class="cv" data-c="${c}" d="M0,9 L300,9" stroke-width="${1 + c * 0.5}" vector-effect="non-scaling-stroke"/></svg><b data-midi="${midiDe(c, 0)}"></b></button>`).join('');
+$('#cuerdas').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  afParar();
+  tocar(+b.dataset.c, 0, undefined, 0.8);
+});
+pulsos.push((c, t, vol, voz) => {
+  if (voz || t || !$('#cuerdas').offsetParent) return;
+  vibrar($(`#cuerdas .cv[data-c="${c}"]`), { inicio: 0, x0: 0, x1: 300, y: 9, amp: 7 }, vol, c);
+});
+
+// ---------- Afinador: detecta el tono con autocorrelación normalizada (método McLeod) ----------
+function detectarTono(x, sr) {
+  const n = x.length, min = Math.floor(sr / 1000), max = Math.floor(sr / 65);   // de Mi grave (82 Hz) al traste 12 y más
+  let energia = 0;
+  for (let i = 0; i < n; i++) energia += x[i] * x[i];
+  if (Math.sqrt(energia / n) < 0.008) return null;                 // silencio
+  const nsdf = new Float32Array(max + 2);
+  for (let tau = min - 1; tau <= max + 1; tau++) {
+    let acf = 0, m = 0;
+    for (let i = 0; i < n - tau; i++) { acf += x[i] * x[i + tau]; m += x[i] * x[i] + x[i + tau] * x[i + tau]; }
+    nsdf[tau] = m ? 2 * acf / m : 0;
+  }
+  const picos = [];
+  for (let tau = min; tau <= max; tau++) if (nsdf[tau] > nsdf[tau - 1] && nsdf[tau] >= nsdf[tau + 1]) picos.push(tau);
+  const tope = Math.max(...picos.map(t => nsdf[t]));
+  if (!picos.length || tope < 0.8) return null;                    // sonido sin tono claro
+  const tau = picos.find(t => nsdf[t] >= 0.9 * tope);              // el primer pico fuerte evita errores de octava
+  const a = nsdf[tau - 1], b = nsdf[tau], c = nsdf[tau + 1], ajuste = (a - c) / (2 * (a - 2 * b + c) || 1);
+  return sr / (tau + ajuste);
+}
+// Cabeza de la guitarra vista de frente: graves a la izquierda, la 6ª y la 1ª junto a la cejuela
+const CLAVIJAS = { 6: [168, 190], 5: [168, 130], 4: [168, 70], 1: [232, 190], 2: [232, 130], 3: [232, 70] };
+(() => {
+  let s = `<svg viewBox="0 0 400 330" role="group" aria-label="Cabeza de la guitarra con sus seis clavijas">
+    <rect x="150" y="236" width="100" height="94" fill="var(--madera)"/><rect x="140" y="20" width="120" height="222" rx="20" fill="var(--madera)"/>
+    <rect x="150" y="296" width="100" height="3" fill="var(--traste)"/>`;
+  for (let c = 6; c >= 1; c--) {
+    const [px, py] = CLAVIJAS[c], nx = 160 + (6 - c) * 16, izq = px < 200, kx = izq ? 104 : 296, tx = izq ? 82 : 318;
+    s += `<polyline class="af-cuerda" data-c="${c}" points="${nx},330 ${nx},240 ${px},${py}" stroke-width="${0.9 + c * 0.35}"/>
+      <circle cx="${px}" cy="${py}" r="5.5" fill="#cfd2da"/>
+      <g class="clavija" data-c="${c}" tabindex="0" role="button" aria-label="Clavija de la ${ORDINAL[c]} cuerda">
+        <line x1="${izq ? 140 : 260}" x2="${kx}" y1="${py}" y2="${py}" stroke="var(--traste)" stroke-width="5"/>
+        <ellipse class="perilla" cx="${kx}" cy="${py}" rx="12" ry="18"/>
+        <text x="${tx}" y="${py - 2}" text-anchor="${izq ? 'end' : 'start'}">${ORDINAL[c]} <tspan data-midi="${midiDe(c, 0)}"></tspan></text>
+        <text class="orden" x="${tx}" y="${py + 14}" text-anchor="${izq ? 'end' : 'start'}"></text>
+      </g>`;
+  }
+  $('#af-guitarra').innerHTML = s + '<rect x="148" y="236" width="104" height="7" rx="2" fill="#efe6cf"/></svg>';
+})();
+function afLuz(c, orden, bien) {
+  const caja = $('#af-guitarra');
+  $$('.activa', caja).forEach(e => e.classList.remove('activa'));
+  if (c) {
+    const g = $(`.clavija[data-c="${c}"]`, caja);
+    g.classList.add('activa'); g.classList.toggle('lista', bien);
+    $(`.af-cuerda[data-c="${c}"]`, caja).classList.add('activa');
+  }
+  $$('.clavija', caja).forEach(g => $('.orden', g).textContent = +g.dataset.c === c && !bien ? orden : g.classList.contains('lista') ? '✓ afinada' : '');
+  $('#af-cuenta').textContent = `Cuerdas afinadas: ${$$('.lista', caja).length} de 6`;
+}
+function afElegir(e) {
+  const g = e.target.closest('.clavija'); if (!g) return;
+  $('#af-cuerda').value = g.dataset.c;
+  if (!af.activo) { tocar(+g.dataset.c, 0, undefined, 0.8); afLuz(+g.dataset.c, '', g.classList.contains('lista')); setTimeout(() => af.activo || afLuz(0), 1200); }
+}
+$('#af-guitarra').addEventListener('click', afElegir);
+$('#af-guitarra').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); afElegir(e); } });
+// ---------- Micrófono compartido: un solo análisis para el afinador y los retos ----------
+// Se analiza a la mitad de muestras (≈24 kHz): sobra para una guitarra y cuesta 4 veces menos en equipos modestos.
+const mic = { flujo: null, nodo: null, id: null, alCerrar: null, rmsPrev: 0 };
+const MSG_SIN_MIC = 'No hay acceso al micrófono. Dentro de Claude está bloqueado: abre la página en Chrome, Edge, Firefox o Safari y acepta el permiso. Si lo rechazaste, actívalo en el candado de la barra de direcciones.';
+async function micAbrir(oyente, alCerrar) {
+  micCerrar();
+  const a = audio();
+  const flujo = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+  const analizador = a.createAnalyser(), datos = new Float32Array(4096), medio = new Float32Array(2048), sr = a.sampleRate / 2;
+  analizador.fftSize = 4096;
+  mic.flujo = flujo; mic.alCerrar = alCerrar; mic.rmsPrev = 0;
+  mic.nodo = a.createMediaStreamSource(flujo);
+  mic.nodo.connect(analizador);
+  mic.id = setInterval(() => {
+    analizador.getFloatTimeDomainData(datos);
+    let e = 0;
+    for (let i = 0; i < 2048; i++) { medio[i] = (datos[2 * i] + datos[2 * i + 1]) / 2; e += medio[i] * medio[i]; }
+    const rms = Math.sqrt(e / 2048), ataque = rms > 0.02 && rms > mic.rmsPrev * 1.6;   // ataque = cuerda recién pulsada
+    mic.rmsPrev = rms;
+    oyente(detectarTono(medio, sr), ataque);
+  }, 90);
+}
+function micCerrar() {
+  if (!mic.flujo) return;
+  clearInterval(mic.id);
+  mic.flujo.getTracks().forEach(t => t.stop());
+  mic.nodo.disconnect();
+  mic.flujo = mic.nodo = null;
+  const fin = mic.alCerrar; mic.alCerrar = null;
+  if (fin) fin();
+}
+relojes.push({ parar: micCerrar });
+
+const af = { activo: false, hist: [], vacios: 0 };
+function afMostrar(f) {
+  if (!f) { if (++af.vacios === 12) { af.hist = []; afLuz(0); $('#af-msg').textContent = 'Toca una cuerda al aire y déjala sonar.'; } return; }
+  af.vacios = 0;
+  af.hist.push(f); if (af.hist.length > 5) af.hist.shift();
+  const hz = [...af.hist].sort((p, q) => p - q)[af.hist.length >> 1];          // mediana
+  const cents = c => 1200 * Math.log2(hz / (440 * 2 ** ((midiDe(c, 0) - 69) / 12)));
+  const c = +$('#af-cuerda').value || [1, 2, 3, 4, 5, 6].reduce((p, q) => Math.abs(cents(q)) < Math.abs(cents(p)) ? q : p);
+  const d = Math.round(cents(c)), bien = Math.abs(d) <= 5;
+  $('#af-nota').textContent = `${ORDINAL[c]} · ${nombre(midiDe(c, 0))}`;
+  $('#af-hz').textContent = `${hz.toFixed(1)} Hz · ${d > 0 ? '+' : ''}${d} cents`;
+  $('#af-aguja').style.left = 50 + Math.max(-50, Math.min(50, d)) + '%';
+  $('#af-medidor').classList.toggle('bien', bien);
+  afLuz(c, d < 0 ? 'aprieta ▲' : 'afloja ▼', bien);
+  $('#af-msg').textContent = bien ? 'Afinada. Pasa a la siguiente cuerda.'
+    : d < 0 ? `${d < -50 ? 'Muy grave' : 'Grave'}: aprieta la clavija para subir el tono.`
+    : `${d > 50 ? 'Muy aguda' : 'Aguda'}: afloja la clavija para bajar el tono.`;
+}
+function afParar() { if (af.activo) micCerrar(); }
+$('#af-btn').addEventListener('click', async () => {
+  if (af.activo) return micCerrar();
+  try {
+    await micAbrir(f => afMostrar(f), () => {
+      af.activo = false; af.hist = []; afLuz(0);
+      $('#af-btn').textContent = 'Activar micrófono';
+      $('#af-msg').textContent = 'Micrófono apagado.';
+    });
+    af.activo = true;
+    $('#af-btn').textContent = 'Apagar micrófono';
+    $('#af-msg').textContent = 'Toca una cuerda al aire y déjala sonar.';
+  } catch (e) {
+    $('#af-msg').textContent = MSG_SIN_MIC;
+  }
+});
+
+// ---------- Espejo de postura: cuerpo (fase 1) y manos (fase 2) con MediaPipe ----------
+// Primero busca la librería y los modelos junto a la página (versión sin internet); si no están, usa internet.
+const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MODELOS = {
+  pose: ['./modelos/pose_landmarker_lite.task', 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'],
+  mano: ['./modelos/hand_landmarker.task', 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'],
+};
+const REVISIONES = {
+  'Cuerpo': { tronco: 'Tronco derecho', nivel: 'Hombros nivelados', sueltos: 'Hombros sueltos', cabeza: 'Cabeza erguida' },
+  'Manos y guitarra': { mastil: 'Mástil un poco hacia arriba', munecaT: 'Muñeca que pisa, recta', dedos: 'Dedos arqueados', munecaR: 'Muñeca que rasguea, suelta' },
+};
+const po = { flujo: null, pose: null, manos: null, origen: '', raf: 0, ultimo: 0, pausa: 140, costo: 0, avisoLento: false, m: {}, armado: false, desde: null, ref: leer('postura', null) };
+$('#po-zurdo').checked = leer('zurdo', false);
+$('#po-zurdo').addEventListener('change', e => { guardar('zurdo', e.target.checked); po.m = {}; });
+$('#po-con-manos').addEventListener('change', () => { po.m = {}; });
+
+function poEstados(e = {}) {
+  $('#po-lista').innerHTML = Object.entries(REVISIONES).map(([grupo, rev]) =>
+    `<li class="grupo">${grupo}</li>` + Object.entries(rev).map(([k, n]) =>
+      `<li>${n}<b class="${e[k] || ''}">${{ ok: 'bien', mal: 'corrige' }[e[k]] || 'sin datos'}</b></li>`).join('')).join('');
+}
+const grados = (a, b) => Math.atan2(a, b) * 180 / Math.PI;
+function angulo(a, b, c) {                                          // ángulo en b, en 3D, de 0 a 180
+  const u = [a.x - b.x, a.y - b.y, (a.z || 0) - (b.z || 0)], v = [c.x - b.x, c.y - b.y, (c.z || 0) - (b.z || 0)];
+  const pp = u[0] * v[0] + u[1] * v[1] + u[2] * v[2], n = Math.hypot(...u) * Math.hypot(...v);
+  return n ? Math.acos(Math.max(-1, Math.min(1, pp / n))) * 180 / Math.PI : 180;
+}
+function suavizar(crudo) {
+  for (const k in crudo) po.m[k] = crudo[k] == null ? null : po.m[k] == null ? crudo[k] : po.m[k] * 0.75 + crudo[k] * 0.25;
+}
+
+function poEvaluar(lm, manos, w, h) {
+  const lienzo = $('#po-lienzo'), g = lienzo.getContext('2d');
+  if (lienzo.width !== w) { lienzo.width = w; lienzo.height = h; }
+  g.clearRect(0, 0, w, h);
+  if (!lm || [0, 7, 8, 11, 12].some(i => (lm[i].visibility ?? 1) < 0.5)) {
+    po.m = {}; po.desde = null; $('#po-cuenta').textContent = ''; poEstados();
+    if (po.armado) $('#po-verdes').textContent = 'Para la foto: necesito verte completo';
+    $('#po-msg').textContent = 'No te veo bien. Aléjate hasta que se vean tu cabeza y tus dos hombros.';
+    return;
+  }
+  const P = i => ({ x: lm[i].x * w, y: lm[i].y * h, v: lm[i].visibility ?? 1 });
+  const medio = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  // Puntos de la persona: 0 nariz, 7/8 orejas, 11/12 hombros, 13/14 codos, 15/16 muñecas, 23/24 cadera (impares = su lado izquierdo)
+  const hi = P(11), hd = P(12), oi = P(7), od = P(8), ci = P(23), cd = P(24), nariz = P(0);
+  const ancho = Math.hypot(hi.x - hd.x, hi.y - hd.y), H = medio(hi, hd), O = medio(oi, od), C = medio(ci, cd);
+  const crudo = {
+    nivel: grados(hi.y - hd.y, hi.x - hd.x),                       // + = hombro derecho más alto
+    sueltos: (H.y - O.y) / ancho,                                  // distancia oreja-hombro; baja al encogerlos
+    cabeza: (nariz.y - O.y) / ancho,                               // sube al agachar la cabeza
+    tronco: ci.v > 0.5 && cd.v > 0.5 ? grados(H.x - C.x, C.y - H.y) : null,
+  };
+
+  // ---- Fase 2: manos. La mano que pisa es la izquierda (la derecha si eres zurdo) ----
+  const zurdo = $('#po-zurdo').checked, conManos = $('#po-con-manos').checked;
+  const lado = { T: zurdo ? 'derecha' : 'izquierda', R: zurdo ? 'izquierda' : 'derecha' };
+  const idx = zurdo ? { T: [14, 16], R: [13, 15] } : { T: [13, 15], R: [14, 16] };   // [codo, muñeca]
+  const brazo = k => idx[k].every(i => P(i).v > 0.5) ? { codo: P(idx[k][0]), muneca: P(idx[k][1]) } : null;
+  const bT = brazo('T'), bR = brazo('R');
+  const aPix = m => m.map(p => ({ x: p.x * w, y: p.y * h, z: p.z * w }));
+  const manoDe = b => {                                            // la mano detectada más cercana a esa muñeca del cuerpo
+    if (!b || !manos) return null;
+    let mejor = null, dist = ancho * 0.6;
+    for (const m of manos.map(aPix)) { const d = Math.hypot(m[0].x - b.muneca.x, m[0].y - b.muneca.y); if (d < dist) { dist = d; mejor = m; } }
+    return mejor;
+  };
+  const mT = conManos ? manoDe(bT) : null, mR = conManos ? manoDe(bR) : null;
+  const doblez = (b, m) => b && m ? 180 - angulo(b.codo, m[0], m[9]) : null;   // 0 = muñeca recta
+  if (conManos) Object.assign(crudo, {
+    mastil: bT && bR ? grados(bR.muneca.y - bT.muneca.y, Math.abs(bT.muneca.x - bR.muneca.x)) : null,   // + = la mano que pisa más alta
+    munecaT: doblez(bT, mT),
+    munecaR: doblez(bR, mR),
+    dedos: mT ? [[5, 6, 7], [9, 10, 11], [13, 14, 15]].reduce((s, [a, b, c]) => s + angulo(mT[a], mT[b], mT[c]), 0) / 3 : null,   // 180 = dedos planos
+  });
+  else Object.assign(crudo, { mastil: null, munecaT: null, munecaR: null, dedos: null });
+  suavizar(crudo);
+
+  const m = po.m, r = po.ref, juzga = (v, mal) => v == null ? '' : mal(v) ? 'mal' : 'ok';
+  const e = {
+    tronco: juzga(m.tronco, v => Math.abs(v) > 10),
+    nivel: juzga(m.nivel, v => Math.abs(v) > 7),
+    sueltos: juzga(m.sueltos, v => v < (r ? r.sueltos * 0.85 : 0.4)),
+    cabeza: juzga(m.cabeza, v => v > (r ? r.cabeza + 0.12 : 0.25)),
+    mastil: juzga(m.mastil, v => v < -5 || v > 50),
+    munecaT: juzga(m.munecaT, v => v > 55),
+    dedos: juzga(m.dedos, v => v > 160),
+    munecaR: juzga(m.munecaR, v => v > 60),
+  };
+  poEstados(e);
+  $('#po-msg').textContent =
+    e.tronco === 'mal' ? `Estás inclinado hacia tu ${m.tronco > 0 ? 'izquierda' : 'derecha'}. Endereza la espalda.`
+    : e.nivel === 'mal' ? `Tu hombro ${m.nivel > 0 ? 'derecho' : 'izquierdo'} está más alto. Déjalo caer.`
+    : e.sueltos === 'mal' ? 'Tienes los hombros encogidos. Suéltalos y respira.'
+    : e.cabeza === 'mal' ? 'Estás agachando la cabeza hacia el mástil. Sube la vista y acerca la guitarra a ti.'
+    : e.mastil === 'mal' ? (m.mastil < -5 ? `El mástil está caído. Sube un poco tu mano ${lado.T}.` : 'El mástil está casi vertical. Bájalo un poco.')
+    : e.munecaT === 'mal' ? `Tu muñeca ${lado.T} está muy doblada. Baja el codo y deja que el pulgar descanse detrás del mástil.`
+    : e.dedos === 'mal' ? 'Tus dedos están planos. Arquéalos y pisa con la punta, como si sostuvieras una pelota.'
+    : e.munecaR === 'mal' ? `Tu muñeca ${lado.R} está tensa y doblada. Déjala suelta, como si sacudieras agua de la mano.`
+    : e.tronco === '' ? 'Hombros y cabeza bien. Aléjate un poco para revisar también el tronco.'
+    : conManos && !mT ? `Cuerpo bien. Acércate o mejora la luz para que vea tu mano ${lado.T}.`
+    : 'Buena postura. Mantenla mientras tocas.';
+
+  // Dibujo: verde si está bien, rojo si hay que corregir
+  const color = est => est === 'mal' ? '#ff6b4a' : '#3ddc84';
+  const linea = (a, b, est, ancho = 6) => { g.strokeStyle = color(est); g.lineWidth = ancho; g.lineCap = 'round'; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); };
+  linea(hi, hd, e.nivel === 'mal' || e.sueltos === 'mal' ? 'mal' : 'ok');
+  linea(O, nariz, e.cabeza); linea(oi, od, e.cabeza);
+  if (m.tronco != null) linea(H, C, e.tronco);
+  if (e.mastil) { g.setLineDash([12, 10]); linea(bT.muneca, bR.muneca, e.mastil, 4); g.setLineDash([]); }
+  const HUESOS = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [0, 17], [17, 18], [18, 19], [19, 20]];
+  const mano = (mm, est) => { if (mm) HUESOS.forEach(([a, b]) => linea(mm[a], mm[b], est, 3)); };
+  mano(mT, e.munecaT === 'mal' || e.dedos === 'mal' ? 'mal' : 'ok');
+  mano(mR, e.munecaR);
+
+  // Foto automática: solo cuando TODAS las revisiones activas están en verde durante 3 segundos
+  if (!po.armado) return;
+  const nombres = Object.assign({}, ...Object.values(REVISIONES));
+  const requeridas = Object.keys(REVISIONES['Cuerpo']).concat(conManos && po.manos ? Object.keys(REVISIONES['Manos y guitarra']) : []);
+  const faltan = requeridas.filter(k => e[k] !== 'ok');
+  $('#po-verdes').textContent = `Para la foto: ${requeridas.length - faltan.length} de ${requeridas.length} en verde`;
+  if (faltan.length) {
+    po.desde = null; $('#po-cuenta').textContent = '';
+    if (!faltan.some(k => e[k] === 'mal'))                          // nada está mal, pero hay cosas que no se ven
+      $('#po-msg').textContent = `Todo lo que veo está bien. Para tomar la foto necesito ver también: ${faltan.map(k => nombres[k].toLowerCase()).join(', ')}. Acomoda la cámara para que se vea todo tu cuerpo y tus manos.`;
+    return;
+  }
+  po.desde ??= performance.now();
+  const falta = 3 - (performance.now() - po.desde) / 1000;
+  if (falta > 0) { $('#po-cuenta').textContent = Math.ceil(falta); $('#po-msg').textContent = 'Buena postura. No te muevas…'; return; }
+  const foto = document.createElement('canvas'), f = foto.getContext('2d');
+  foto.width = w; foto.height = h;
+  f.translate(w, 0); f.scale(-1, 1);                               // igual que el espejo
+  f.drawImage($('#po-video'), 0, 0, w, h); f.drawImage(lienzo, 0, 0);
+  $('#po-foto').src = foto.toDataURL('image/jpeg', 0.85);
+  $('#po-figura').hidden = false;
+  po.ref = { sueltos: m.sueltos, cabeza: m.cabeza }; guardar('postura', po.ref);
+  po.armado = false; po.desde = null;
+  $('#po-cuenta').textContent = ''; $('#po-ref').disabled = false;
+  $('#po-msg').textContent = 'Foto tomada con todo en verde. Esta es tu postura de referencia.';
+  $('#po-verdes').textContent = '';
+}
+function poCuadro(t) {
+  po.raf = requestAnimationFrame(poCuadro);
+  const v = $('#po-video');
+  if (t - po.ultimo < po.pausa || v.readyState < 2) return;
+  po.ultimo = t;
+  const inicio = performance.now();
+  const cuerpo = po.pose.detectForVideo(v, t).landmarks[0];
+  const manos = po.manos && $('#po-con-manos').checked ? po.manos.detectForVideo(v, t).landmarks : null;
+  poEvaluar(cuerpo, manos, v.videoWidth, v.videoHeight);
+  // Se adapta al equipo: si el análisis tarda, analiza menos veces por segundo para no trabar la página
+  po.costo = po.costo * 0.8 + (performance.now() - inicio) * 0.2;
+  po.pausa = Math.min(600, Math.max(140, po.costo * 3));
+  if (po.costo > 150 && !po.avisoLento) {
+    po.avisoLento = true;
+    $('#po-origen').textContent += ' Tu equipo va algo lento: si se traba, desactiva «Revisar manos».';
+  }
+}
+function poParar() {
+  if (!po.flujo) return;
+  cancelAnimationFrame(po.raf);
+  po.flujo.getTracks().forEach(t => t.stop());
+  po.flujo = null; po.m = {}; po.desde = null; $('#po-cuenta').textContent = ''; $('#po-verdes').textContent = '';
+  $('#po-video').srcObject = null;
+  const l = $('#po-lienzo'); l.getContext('2d').clearRect(0, 0, l.width, l.height);
+  $('#po-btn').textContent = 'Activar cámara'; $('#po-ref').disabled = true;
+  $('#po-msg').textContent = 'Cámara apagada.';
+  poEstados();
+}
+relojes.push({ parar: poParar });
+
+// Carga: primero lo que esté junto a la página, después internet
+async function existe(ruta) { try { return (await fetch(ruta, { method: 'HEAD' })).ok; } catch (e) { return false; } }
+async function poCargar() {
+  let lib, base = './mediapipe', local = true;
+  try { lib = await import(base + '/vision_bundle.mjs'); }
+  catch (e) {
+    if (!navigator.onLine) throw new Error('sin-internet');
+    lib = await import(MP + '/vision_bundle.mjs'); base = MP; local = false;
+  }
+  const archivos = await lib.FilesetResolver.forVisionTasks(base + '/wasm');
+  const ruta = async ([cerca, lejos]) => {                          // sin internet, la app instalada lo sirve desde su caché
+    if (await existe(cerca)) return cerca;
+    local = false; return lejos;
+  };
+  const crear = async (Tarea, modelo, extra) => {
+    try { return await Tarea.createFromOptions(archivos, { baseOptions: { modelAssetPath: modelo, delegate: 'GPU' }, runningMode: 'VIDEO', ...extra }); }
+    catch (e) { return Tarea.createFromOptions(archivos, { baseOptions: { modelAssetPath: modelo, delegate: 'CPU' }, runningMode: 'VIDEO', ...extra }); }
+  };
+  po.pose = await crear(lib.PoseLandmarker, await ruta(MODELOS.pose), { numPoses: 1 });
+  try { po.manos = await crear(lib.HandLandmarker, await ruta(MODELOS.mano), { numHands: 2 }); }
+  catch (e) { po.manos = null; }                                   // sin modelo de manos, la fase 1 sigue funcionando
+  po.origen = local ? 'Modelos cargados desde tu computadora: el espejo funciona sin internet.' : 'Modelos listos. Si instalaste la app, quedan guardados para usarlos sin internet.';
+}
+$('#po-btn').addEventListener('click', async () => {
+  if (po.flujo) return poParar();
+  const msg = $('#po-msg'), v = $('#po-video');
+  try {
+    po.flujo = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, facingMode: 'user' } });   // basta para la postura y pesa menos
+    v.srcObject = po.flujo; await v.play();
+  } catch (e) {
+    po.flujo = null;
+    msg.textContent = 'No hay acceso a la cámara. Dentro de Claude está bloqueada: abre la página en Chrome o Firefox y acepta el permiso.';
+    return;
+  }
+  $('#po-btn').textContent = 'Apagar cámara';
+  try {
+    if (!po.pose) { msg.textContent = 'Cargando los modelos de postura y manos…'; await poCargar(); }
+  } catch (e) {
+    poParar();
+    msg.textContent = e.message === 'sin-internet' || !navigator.onLine
+      ? 'Sin internet no puedo cargar los modelos. Usa el espejo una vez con internet desde la app instalada y quedará guardado.'
+      : location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        ? 'No encontré los modelos en la carpeta modelos. Ejecuta descargar-modelos.sh una vez con internet.'
+        : 'No se pudieron cargar los modelos. Revisa tu conexión a internet e inténtalo de nuevo.';
+    return;
+  }
+  if (!po.flujo) return;                                           // se apagó mientras cargaba
+  $('#po-origen').textContent = po.origen + (po.manos ? '' : ' No se pudo cargar el modelo de manos; solo reviso el cuerpo.');
+  po.armado = true; po.desde = null; po.pausa = 140; po.costo = 0; po.avisoLento = false;
+  po.raf = requestAnimationFrame(poCuadro);
+});
+$('#po-ref').addEventListener('click', () => {
+  po.armado = true; po.desde = null;                               // el contador vuelve a empezar cuando la pose sea correcta
+  $('#po-ref').disabled = true;
+  $('#po-msg').textContent = 'Acomódate. La foto se toma sola cuando la postura sea correcta.';
+});
+poEstados();
+
+// ---------- Conexión: qué funciona con y sin internet ----------
+function pintarConexion() {
+  const en = navigator.onLine, el = $('#conexion');
+  el.className = 'chip ' + (en ? 'si' : 'no');
+  el.textContent = en ? 'Con internet' : 'Sin internet';
+}
+addEventListener('online', pintarConexion); addEventListener('offline', pintarConexion);
+pintarConexion();
+
+// ---------- App instalable: service worker y botón «Instalar app» ----------
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {} });
+}
+let instalacion = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalacion = e; $('#instalar').hidden = false; });
+addEventListener('appinstalled', () => { $('#instalar').hidden = true; });
+$('#instalar').addEventListener('click', async () => {
+  if (!instalacion) return;
+  instalacion.prompt();
+  await instalacion.userChoice;
+  instalacion = null; $('#instalar').hidden = true;
+});
+
+// ---------- Nivel 2: notas, reto e himno ----------
+let reto = null, racha = 0;
+const NATURALES = [0, 2, 4, 5, 7, 9, 11];
+function avisar(el, texto, clase = '') {
+  el.textContent = texto;
+  el.classList.remove('acierto', 'fallo');
+  if (clase) { void el.offsetWidth; el.classList.add(clase); }
+}
+function nuevoReto() {
+  let n; do { n = NATURALES[Math.floor(Math.random() * 7)]; } while (n === reto);
+  reto = n;
+}
+function textoReto() { return `Toca un ${nombre(reto)} en cualquier cuerda. Racha: ${racha}`; }
+function responderReto(midi) {
+  if (reto === null) return;
+  if (midi % 12 === reto) {
+    racha++; nuevoReto();
+    if (racha === 5) marcarMeta('notas', 2);
+    avisar($('#reto-txt'), `¡Bien, era ${nombre(midi)}! Ahora toca un ${nombre(reto)}. Racha: ${racha}`, 'acierto');
+  } else {
+    racha = 0;
+    avisar($('#reto-txt'), `Ese es ${nombre(midi)}. Busca un ${nombre(reto)}. Racha: 0`, 'fallo');
+  }
+}
+const dpNotas = diapason($('#dp-notas'), (c, t) => {
+  const m = midiDe(c, t);
+  $('#lectura-notas').textContent = `${ORDINAL[c]} cuerda, ${t === 0 ? 'al aire' : 'traste ' + t} → ${nombre(m)}`;
+  responderReto(m);
+});
+$('#ver-nombres').addEventListener('change', e => $('#dp-notas').classList.toggle('nombres', e.target.checked));
+$('#reto-btn').addEventListener('click', e => { racha = 0; nuevoReto(); avisar($('#reto-txt'), textoReto()); e.target.textContent = 'Reiniciar reto'; });
+
+// Oído: convierte lo que escucha el micrófono en notas. Una nota cuenta una vez por cada pulsación.
+const oido = { previo: null, iguales: 0, listo: true };
+function escucharNotas(alNota, alSilencio) {
+  return (f, ataque) => {
+    if (!f) { oido.previo = null; oido.iguales = 0; oido.listo = true; if (alSilencio) alSilencio(); return; }
+    const exacto = 69 + 12 * Math.log2(f / 440), m = Math.round(exacto);
+    if (Math.abs(exacto - m) > 0.4) return;                         // muy desafinada o ruido
+    if (ataque || m !== oido.previo) { oido.listo = true; oido.iguales = 0; }
+    oido.iguales++; oido.previo = m;
+    if (oido.listo && oido.iguales >= 2) { oido.listo = false; alNota(m); }   // 2 lecturas iguales seguidas (≈0.2 s)
+  };
+}
+function posicionesDe(m) {                                           // dónde está esa nota en los trastes 0 a 12
+  return [1, 2, 3, 4, 5, 6].map(c => [c, m - midiDe(c, 0)]).filter(([, t]) => t >= 0 && t <= 12);
+}
+function botonMic(btn, activo) { btn.setAttribute('aria-pressed', activo); }
+async function alternarOido(btn, otro, alNota, alAbrir, alCerrar) {
+  if (btn.getAttribute('aria-pressed') === 'true') return micCerrar();
+  try {
+    await micAbrir(escucharNotas(alNota), () => { botonMic(btn, false); alCerrar(); });
+    botonMic(btn, true); botonMic(otro, false);
+    alAbrir();
+  } catch (e) { avisar(btn.closest('.tarjeta').querySelector('.reto-txt'), MSG_SIN_MIC, 'fallo'); }
+}
+$('#reto-mic').addEventListener('click', e => alternarOido(e.currentTarget, $('#himno-mic'), m => {
+  posicionesDe(m).forEach(([c, t]) => dpNotas.destello(c, t));
+  $('#reto-oido').textContent = `Escuché: ${nombre(m)}`;
+  responderReto(m);
+}, () => {
+  if (reto === null) { racha = 0; nuevoReto(); $('#reto-btn').textContent = 'Reiniciar reto'; }
+  avisar($('#reto-txt'), textoReto());
+  $('#reto-oido').textContent = 'Te escucho. Toca la nota y déjala sonar.';
+}, () => { $('#reto-oido').textContent = ''; }));
+
+const HIMNO = [[1, 0], [1, 0], [1, 1], [1, 3], [1, 3], [1, 1], [1, 0], [2, 3], [2, 1], [2, 1], [2, 3], [1, 0], [1, 0, 1.5], [2, 3, 0.5], [2, 3, 2]];
+function tocarSerie(serie, seg) {
+  let t = audio().currentTime + 0.08;
+  serie.forEach(([c, tr, dur = 1]) => { tocar(c, tr, t); t += dur * seg; });
+}
+$('#himno-btn').addEventListener('click', () => { pararTodo(); tocarSerie(HIMNO, 0.55); });
+
+// Himno guiado: marca la siguiente nota y avanza cuando la escucha en tu guitarra
+let himnoPaso = 0;
+function himnoObjetivo() {
+  const [c, t] = HIMNO[himnoPaso], pos = [[], [], [], [], [], []];
+  pos[c - 1].push(t);
+  dpNotas.marcar(pos, -1);
+  return `Nota ${himnoPaso + 1} de ${HIMNO.length}: ${nombre(midiDe(c, t))} en la ${ORDINAL[c]} cuerda, ${t ? 'traste ' + t : 'al aire'}.`;
+}
+$('#himno-mic').addEventListener('click', e => alternarOido(e.currentTarget, $('#reto-mic'), m => {
+  const [c, t] = HIMNO[himnoPaso];
+  if (m !== midiDe(c, t)) { avisar($('#himno-txt'), `Escuché ${nombre(m)}. ${himnoObjetivo()}`, 'fallo'); return; }
+  dpNotas.destello(c, t);
+  himnoPaso++;
+  if (himnoPaso === HIMNO.length) {
+    himnoPaso = 0; dpNotas.marcar([[], [], [], [], [], []]);
+    avisar($('#himno-txt'), '¡Completaste el Himno a la alegría! Repítela hasta tocarla sin pausas.', 'acierto');
+    return;
+  }
+  avisar($('#himno-txt'), '¡Bien! ' + himnoObjetivo(), 'acierto');
+}, () => {
+  himnoPaso = 0;
+  avisar($('#himno-txt'), 'Te escucho. ' + himnoObjetivo());
+}, () => { dpNotas.marcar([[], [], [], [], [], []]); }));
+
+// ---------- Nivel 3: acordes ----------
+$('#acordes').innerHTML = Object.entries(ACORDES).map(([nom, a]) => {
+  let s = '<svg viewBox="0 0 100 120" aria-hidden="true">';
+  for (let i = 0; i < 6; i++) s += `<line class="${a.t[i] < 0 ? '' : 'cs'}" style="--i:${i}" x1="${15 + i * 14}" x2="${15 + i * 14}" y1="28" y2="108"/>`;
+  for (let k = 0; k <= 4; k++) s += `<line x1="15" x2="85" y1="${28 + k * 20}" y2="${28 + k * 20}" stroke-width="${k ? 1 : 4}"/>`;
+  a.t.forEach((t, i) => {
+    const x = 15 + i * 14;
+    if (t <= 0) s += `<text class="marca" x="${x}" y="19">${t < 0 ? '×' : '○'}</text>`;
+    else s += `<circle class="dedo" cx="${x}" cy="${18 + t * 20}" r="6.5"/><text class="dn" x="${x}" y="${18 + t * 20}">${a.d[i]}</text>`;
+  });
+  return `<button type="button" data-a="${nom}" aria-label="Escuchar ${a.es}">${s}</svg><strong>${nom}</strong><small>${a.es}</small></button>`;
+}).join('');
+$('#acordes').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) { pararTodo(); rasguear(b.dataset.a, undefined, true, 0.45); reiniciar(b, 'rasga'); }
+});
+
+// ---------- Nivel 4: ritmo ----------
+const CUENTA = ['1', 'y', '2', 'y', '3', 'y', '4', 'y'];
+$('#r-prog').innerHTML = PROGRESIONES.map((p, i) => `<option value="${i}">${p.join(' – ')}</option>`).join('');
+$('#r-patron').innerHTML = Object.keys(PATRONES).map((k, i) => `<option${i === 2 ? ' selected' : ''}>${k}</option>`).join('');
+const RG = c => 22 + (6 - c) * 21;                                 // 6ª arriba, como la ves al tocar
+(() => {
+  let s = `<svg viewBox="0 0 620 150"><rect width="620" height="150" fill="var(--madera)"/>
+    <circle cx="190" cy="75" r="70" fill="#0d0907"/><circle cx="190" cy="75" r="78" fill="none" stroke="#5a3d2b" stroke-width="5"/>`;
+  for (let c = 6; c >= 1; c--) s += `<path class="cv" data-c="${c}" d="M0,${RG(c)} L620,${RG(c)}" stroke-width="${0.9 + c * 0.4}"/>`;
+  s += `<g id="r-pua" class="aire" style="transform: translate(380px, 6px)"><path d="M-15,-12 Q0,-19 15,-12 Q11,6 0,17 Q-11,6 -15,-12Z"/></g></svg>`;
+  $('#r-guitarra').innerHTML = s;
+})();
+function moverPua(abajo, golpea, seg) {
+  const p = $('#r-pua'), arriba = 'translate(380px, 6px)', abajoT = 'translate(380px, 144px)';
+  p.classList.toggle('aire', !golpea);
+  if (quieto.matches) { p.style.transform = abajo ? abajoT : arriba; return; }
+  p.style.transition = 'none'; p.style.transform = abajo ? arriba : abajoT;
+  void p.getBoundingClientRect();
+  p.style.transition = `transform ${(seg * 0.7).toFixed(3)}s cubic-bezier(.3, .7, .4, 1)`;
+  p.style.transform = abajo ? abajoT : arriba;
+}
+pulsos.push((c, t, vol, voz) => {
+  if (voz || !$('#r-guitarra').offsetParent) return;
+  vibrar($(`#r-guitarra .cv[data-c="${c}"]`), { inicio: 0, x0: 0, x1: 620, y: RG(c), amp: 7 }, vol, c);
+});
+const prog = () => PROGRESIONES[+$('#r-prog').value], patron = () => PATRONES[$('#r-patron').value];
+function pintarRitmo() {
+  const p = patron();
+  $('#r-compas').innerHTML = CUENTA.map((n, i) => `<div><b>${{ D: '↓', U: '↑', '.': '' }[p[i]]}</b><small>${n}</small></div>`).join('');
+  $('#r-lista').innerHTML = prog().map(a => `<span>${a}</span>`).join('');
+  $('#r-acorde').textContent = prog()[0];
+}
+function luzRitmo(i, compas) {
+  $$('#r-compas div').forEach((d, k) => d.classList.toggle('ahora', k === i));
+  $$('#r-lista span').forEach((s, k) => s.classList.toggle('ahora', k === compas));
+  const el = $('#r-acorde');
+  if (compas >= 0 && el.textContent !== prog()[compas]) { el.textContent = prog()[compas]; reiniciar(el, 'cambia'); }
+}
+const relojRitmo = reloj(() => +$('#r-bpm').value, (paso, t) => {
+  const i = paso % 8, compas = Math.floor(paso / 8) % 4, golpe = patron()[i];
+  if (golpe !== '.') rasguear(prog()[compas], t, golpe === 'D');
+  if ($('#r-metro').checked && i % 2 === 0) clic(t, i === 0);
+  alSonar(t, () => { if (!relojRitmo.activo) return; luzRitmo(i, compas); moverPua(i % 2 === 0, golpe !== '.', 30 / +$('#r-bpm').value); });
+}, () => luzRitmo(-1, -1));
+conmutador($('#r-btn'), relojRitmo);
+$('#r-prog').addEventListener('change', pintarRitmo);
+$('#r-patron').addEventListener('change', pintarRitmo);
+$('#r-bpm').addEventListener('input', e => $('#r-bpm-o').textContent = e.target.value);
+pintarRitmo();
+
+// ---------- Nivel 5: escalas ----------
+const dpEscalas = diapason($('#dp-escalas'));
+$('#e-sel').innerHTML = Object.keys(ESCALAS).map(k => `<option>${k}</option>`).join('');
+const escala = () => ESCALAS[$('#e-sel').value];
+function pintarEscala() { dpEscalas.marcar(escala().pos, escala().tonica); $('#e-desc').textContent = escala().desc; }
+$('#e-sel').addEventListener('change', pintarEscala);
+$('#e-btn').addEventListener('click', () => {
+  pararTodo();
+  const notas = escala().pos.flatMap((ts, i) => ts.map(t => [i + 1, t])).sort((a, b) => midiDe(...a) - midiDe(...b));
+  const desde = notas.findIndex(([c, t]) => midiDe(c, t) % 12 === escala().tonica);   // empieza en la tónica
+  const sube = notas.slice(desde);
+  tocarSerie([...sube, ...sube.slice(0, -1).reverse()], 0.3);
+});
+const relojImpro = reloj(() => 84, (paso, t) => {
+  if (paso % 4 === 0) rasguear(FONDO[Math.floor(paso / 8) % 4], t, true, paso % 8 ? 0.16 : 0.26, 'f');
+});
+conmutador($('#e-acomp'), relojImpro);
+pintarEscala();
+
+// ---------- Nivel 6: taller de melodías ----------
+let melodia = leer('melodia', [3, -1, 1, 2, 3, -1, 4, 5, 4, -1, 2, 3, 4, 5, 6, -1]);
+if (!Array.isArray(melodia) || melodia.length !== 16) melodia = Array(16).fill(-1);
+function pintarSeq() {
+  let h = '<span></span>' + FONDO.map(a => `<span class="ac">${a}</span>`).join('');
+  FILAS.forEach((f, r) => {
+    h += `<span class="eti" data-midi="${midiDe(f.c, f.t)}"></span>`;
+    for (let p = 0; p < 16; p++) {
+      const cls = [melodia[p] === r && 'on', p % 2 === 0 && 't', midiDe(f.c, f.t) % 12 === 9 && 'raiz'].filter(Boolean).join(' ');
+      h += `<button type="button" class="${cls}" data-r="${r}" data-p="${p}" aria-pressed="${melodia[p] === r}" aria-label="Paso ${p + 1}, ${ORDINAL[f.c]} cuerda traste ${f.t}"></button>`;
+    }
+  });
+  $('#seq').innerHTML = h;
+  ponerNombres();
+  const lineas = ['e', 'B', 'G', 'D', 'A', 'E'].map((l, i) => {
+    let s = l + '|';
+    melodia.forEach((r, p) => { s += (r >= 0 && FILAS[r].c === i + 1 ? `-${FILAS[r].t}-` : '---') + (p === 7 ? '|' : ''); });
+    return s + '|';
+  });
+  $('#m-tab').textContent = lineas.join('\n');
+  guardar('melodia', melodia);
+}
+$('#seq').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const r = +b.dataset.r, p = +b.dataset.p;
+  melodia[p] = melodia[p] === r ? -1 : r;
+  pintarSeq();
+  if (melodia[p] >= 0) { tocar(FILAS[r].c, FILAS[r].t); celdaSuena(r, p); }
+});
+function celdaSuena(r, p) {
+  const b = $(`#seq button[data-r="${r}"][data-p="${p}"]`); if (!b) return;
+  reiniciar(b, 'golpe');
+  if (quieto.matches) return;
+  const n = document.createElement('span');
+  n.className = 'vuela'; n.textContent = p % 3 ? '♪' : '♫';
+  n.style.left = b.offsetLeft + b.offsetWidth / 2 + 'px'; n.style.top = b.offsetTop - 6 + 'px';
+  n.addEventListener('animationend', () => n.remove());
+  $('#seq').append(n);
+}
+const luzSeq = p => $$('#seq button').forEach(b => b.classList.toggle('col', +b.dataset.p === p));
+const relojSeq = reloj(() => +$('#m-bpm').value, (paso, t) => {
+  const p = paso % 16, r = melodia[p];
+  if ($('#m-acomp').checked && p % 4 === 0) rasguear(FONDO[p / 4], t, true, 0.16, 'f');
+  if (r >= 0) tocar(FILAS[r].c, FILAS[r].t, t, 0.75);
+  alSonar(t, () => { if (!relojSeq.activo) return; luzSeq(p); if (r >= 0) celdaSuena(r, p); });
+}, () => luzSeq(-1));
+conmutador($('#m-btn'), relojSeq);
+$('#m-bpm').addEventListener('input', e => $('#m-bpm-o').textContent = e.target.value);
+$('#m-borrar').addEventListener('click', () => { melodia = Array(16).fill(-1); pintarSeq(); });
+$('#m-azar').addEventListener('click', () => {
+  // Motivo de 4 pasos, repetido en el segundo compás, que termina en La
+  let r = 2 + Math.floor(Math.random() * 4);
+  const camina = () => { r = Math.min(7, Math.max(0, r + [-1, -1, 0, 1, 1, 2, -2][Math.floor(Math.random() * 7)])); return Math.random() < 0.25 ? -1 : r; };
+  melodia = Array.from({ length: 16 }, (_, p) => p === 0 ? r : camina());
+  for (let p = 8; p < 12; p++) melodia[p] = melodia[p - 8];
+  melodia[14] = melodia[13] >= 0 && melodia[13] < 4 ? 1 : 6;      // La aguda o La grave
+  melodia[15] = -1;
+  pintarSeq();
+});
+$('#m-copiar').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#m-tab').textContent); $('#m-copiado').textContent = 'Copiada.'; }
+  catch (e) { $('#m-copiado').textContent = 'No se pudo copiar. Selecciona el texto y cópialo a mano.'; }
+});
+pintarSeq();
+
+// ---------- Navegación, objetivos y avance ----------
+const hechos = leer('hechos', {});
+function pintarIndice() {
+  const actual = vistaActual();
+  $('#indice').innerHTML = NIVELES.map(n => {
+    const ok = n.metas.filter((_, i) => hechos[n.id + i]).length;
+    return `<a href="#${n.id}"${n.id === actual ? ' aria-current="page"' : ''}><span class="num">${n.n}</span><span>${n.titulo}</span><small>${n.metas.length ? ok + '/' + n.metas.length : ''}</small></a>`;
+  }).join('');
+  const total = NIVELES.reduce((s, n) => s + n.metas.length, 0), listos = Object.values(hechos).filter(Boolean).length;
+  $('#barra').style.width = 100 * listos / total + '%';
+  $('#avance-txt').textContent = `${listos} de ${total}`;
+}
+function vistaActual() {
+  const h = location.hash.slice(1);
+  return NIVELES.some(n => n.id === h) ? h : 'guitarra';
+}
+function mostrar() {
+  pararTodo();
+  const id = vistaActual(), nivel = NIVELES.find(n => n.id === id);
+  $$('section[data-vista]').forEach(s => s.classList.toggle('activa', s.dataset.vista === id));
+  $('#objetivos-caja').hidden = !nivel.metas.length;
+  $('#objetivos').innerHTML = nivel.metas.map((m, i) =>
+    `<li><label for="meta-${id}-${i}"><input type="checkbox" id="meta-${id}-${i}" data-k="${id + i}"${hechos[id + i] ? ' checked' : ''}> ${m}</label></li>`).join('');
+  pintarIndice();
+}
+function marcarMeta(id, i) {
+  if (hechos[id + i]) return;
+  hechos[id + i] = true; guardar('hechos', hechos);
+  const caja = $(`#meta-${id}-${i}`); if (caja) caja.checked = true;
+  pintarIndice();
+}
+$('#objetivos').addEventListener('change', e => { hechos[e.target.dataset.k] = e.target.checked; guardar('hechos', hechos); pintarIndice(); });
+$('#notacion').addEventListener('change', e => { notacion = e.target.value; ponerNombres(); if (reto !== null) avisar($('#reto-txt'), textoReto()); });
+addEventListener('hashchange', mostrar);
+ponerNombres();
+mostrar();
+</script>
+</body>
+</html>
