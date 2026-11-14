@@ -2,6 +2,8 @@
 
 Tutorial interactivo para aprender guitarra desde cero hasta componer tus propias melodías. Es una sola página web, sin frameworks.
 
+**Pruébala:** https://skinnyray10.github.io/guitarra_desde_cero/
+
 ## Qué incluye
 
 - Seis niveles: tu guitarra, primeras notas, acordes, ritmo, escalas y tu melodía, más un plan de 8 semanas.
@@ -10,22 +12,6 @@ Tutorial interactivo para aprender guitarra desde cero hasta componer tus propia
 - Retos que escuchan tu guitarra: encontrar notas y tocar el Himno a la alegría nota por nota.
 - App instalable (PWA): abre sin internet en computadora, Android y iPhone.
 - Espejo de postura con cámara: cuerpo y manos con MediaPipe Tasks Vision de Google.
-
-## Cómo abrirlo
-
-```sh
-python3 servidor.py
-```
-
-Se abre `http://localhost:8000`. El micrófono y la cámara solo funcionan en `localhost` o en un sitio con HTTPS. Si abres `index.html` con doble clic, funcionan las lecciones y el sonido, pero no la cámara.
-
-## Publicarla en GitHub Pages
-
-1. Sube esta carpeta a un repositorio de GitHub.
-2. En el repositorio: Settings → Pages → Deploy from a branch → `main` / `(root)`.
-3. Queda en `https://<usuario>.github.io/<repositorio>/` (este: https://skinnyray10.github.io/guitarra_desde_cero/) con HTTPS, así funcionan el micrófono, la cámara y el botón «Instalar app».
-
-Al publicar una versión nueva, sube el número de `APP` en `sw.js` para que la app instalada se actualice.
 
 ## Pensada para cualquier equipo
 
@@ -41,10 +27,8 @@ Al publicar una versión nueva, sube el número de `APP` en `sw.js` para que la 
 | Lecciones, sonido, acordes, ritmo, escalas, taller de melodías | Sí |
 | Afinador con micrófono | Sí |
 | Retos que escuchan tu guitarra | Sí |
-| Espejo de postura | Sí, después de usarlo una vez con internet en la app instalada, o con `sh descargar-modelos.sh` en local |
+| Espejo de postura | Sí, después de usarlo una vez con internet en la app instalada |
 | Tipografías | Usa las de tu sistema |
-
-Sin los modelos en `modelos/`, el espejo los descarga de internet cada vez que lo activas.
 
 ## Estructura
 
