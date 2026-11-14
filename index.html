@@ -208,6 +208,51 @@ button:disabled { opacity: .45; cursor: default; }
 @keyframes acierto { 30% { transform: scale(1.06); } }
 .boton[aria-pressed="true"] { background: var(--bien); color: #fff; box-shadow: none; }
 
+/* Canciones */
+.canciones-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.canciones-lista button { display: grid; gap: 4px; text-align: left; padding: 14px; border-radius: 14px; cursor: pointer;
+  background: var(--papel); border: 1px solid var(--linea); color: var(--tinta); }
+.canciones-lista button:hover { border-color: var(--acento); }
+.canciones-lista button[aria-pressed="true"] { border: 2px solid var(--acento); padding: 13px; }
+.canciones-lista strong { font: 700 1.05rem var(--f-titulo); }
+.canciones-lista small { color: var(--tenue); font-size: .85rem; }
+.canciones-lista .acs { font-family: var(--f-mono); font-size: .85rem; }
+.c-acordes { display: flex; flex-wrap: wrap; gap: 10px; }
+.c-acordes figure { margin: 0; display: grid; justify-items: center; padding: 6px 8px; border-radius: 10px; background: var(--fondo); }
+.c-acordes svg { width: 66px; height: 80px; }
+.c-acordes figcaption { font: 800 1rem var(--f-titulo); }
+.c-acordes line { stroke: var(--tinta); }
+.c-acordes .dedo { fill: var(--acento); }
+.c-acordes .dn { fill: var(--sobre-acento); font: 700 10px var(--f-texto); text-anchor: middle; dominant-baseline: central; }
+.c-acordes .marca { fill: var(--tenue); font: 700 11px var(--f-texto); text-anchor: middle; }
+.c-ahora { display: flex; flex-wrap: wrap; gap: 12px 40px; align-items: end; }
+.c-ahora > div { display: grid; }
+.c-ahora small { color: var(--tenue); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+.c-sigue { font: 600 1.6rem var(--f-titulo); color: var(--tenue); }
+.c-hoja { display: grid; gap: 12px; }
+.c-hoja h4 { margin: 0 0 6px; font: 700 .8rem var(--f-texto); text-transform: uppercase; letter-spacing: .06em; color: var(--tenue); }
+.c-fila { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.c-fila span { display: flex; justify-content: center; gap: 10px; padding: 10px 4px; border-radius: 10px; border: 1px solid var(--linea);
+  font: 700 1.1rem var(--f-titulo); transition: background .15s; }
+.c-fila span.ahora { background: var(--nota); border-color: var(--nota); color: #1b1206; animation: pulso .2s ease-out; }
+.c-fila span.hecho { color: var(--tenue); }
+.c-fila i { font-style: normal; }
+
+/* Bienvenida */
+dialog#bienvenida { border: 0; border-radius: 18px; padding: 0; width: min(460px, calc(100% - 32px)); background: var(--papel); color: var(--tinta);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+dialog#bienvenida::backdrop { background: rgba(16, 19, 28, .6); }
+.bv { display: grid; gap: 16px; padding: 26px; }
+.bv-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.bv-cabeza svg { width: 52px; height: 52px; border-radius: 12px; }
+.bv-pasos { display: flex; gap: 6px; }
+.bv-pasos i { width: 28px; height: 5px; border-radius: 3px; background: var(--linea); }
+.bv-pasos i.on { background: var(--acento); }
+.bv p { color: var(--tenue); }
+.bv-opciones { display: grid; gap: 10px; }
+.bv-opciones .boton { width: 100%; padding: 13px 18px; }
+.enlace { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--acento); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
 /* Diapasón */
 .diapason { overflow-x: auto; border-radius: 10px; }
 .diapason svg { display: block; min-width: 660px; width: 100%; height: auto; }
@@ -283,6 +328,7 @@ dt { font-weight: 700; } dd { margin: 0; color: var(--tenue); }
     <p>Seis niveles, de afinar la guitarra a componer tu primera melodía. Todo lo que ves suena al tocarlo.</p>
     <details class="conexion">
       <summary>¿Qué funciona sin internet?</summary>
+      <p><button class="enlace" id="ver-bienvenida" type="button">Ver la bienvenida otra vez</button></p>
       <ul>
         <li><strong>Instálala como app</strong> con el botón «Instalar app» (Chrome, Edge, Android) o, en iPhone, con Compartir → «Agregar a inicio». Instalada abre sin internet.</li>
         <li><strong>Sin internet:</strong> las seis lecciones, el sonido, los acordes, la máquina de rasgueo, las escalas, el taller de melodías, el afinador y los retos que escuchan tu guitarra.</li>
@@ -474,6 +520,33 @@ E|---------|---------|---------|---------|</pre>
       <li>Empieza a 60 y sube de 5 en 5 solo cuando salga tres veces seguidas sin error.</li>
       <li>Si el cambio de acorde te atrasa, cambia antes: la mano derecha nunca se detiene.</li>
     </ol>
+    <p><a href="#canciones">Practica el ritmo con canciones reales →</a></p>
+  </div>
+</section>
+
+<!-- CANCIONES -->
+<section data-vista="canciones">
+  <h2>Canciones</h2>
+  <p class="intro">Canciones tradicionales y de dominio público, de la más sencilla a la más retadora. Primero tócalas junto con la página; después marca tú los acordes y deja que la página solo lleve el ritmo.</p>
+  <div class="canciones-lista" id="c-lista"></div>
+  <div class="tarjeta">
+    <div class="titulo-chips"><h3 id="c-titulo">Canción</h3><span class="chip red" id="c-compas"></span></div>
+    <p class="lectura" id="c-origen"></p>
+    <p id="c-consejo"></p>
+    <div class="c-acordes" id="c-acordes"></div>
+    <div class="c-ahora">
+      <div><small>Ahora</small><span class="acorde-actual" id="c-actual" aria-live="polite">–</span></div>
+      <div><small>Sigue</small><span class="c-sigue" id="c-sigue">–</span></div>
+    </div>
+    <div class="compas" id="c-pulso"></div>
+    <div class="c-hoja" id="c-hoja"></div>
+    <div class="fila">
+      <button class="boton" id="c-btn" type="button">Tocar junto</button>
+      <label for="c-bpm">Tempo <input type="range" id="c-bpm" min="40" max="160" value="80"> <output id="c-bpm-o">80</output></label>
+      <label for="c-metro"><input type="checkbox" id="c-metro" checked> Metrónomo</label>
+    </div>
+    <label for="c-yo"><input type="checkbox" id="c-yo"> Yo toco los acordes: la página solo marca el ritmo y te muestra el acorde que sigue</label>
+    <p class="lectura">Antes de empezar suena un compás de cuenta para que entres a tiempo. Si un cambio de acorde te cuesta, baja el tempo: es la forma más rápida de aprenderlo.</p>
   </div>
 </section>
 
@@ -542,8 +615,8 @@ E|---------|---------|---------|---------|</pre>
         <tr><td>2</td><td>2 y 3</td><td>Reto de notas (5 min) · Em y Am cuerda por cuerda (10 min)</td></tr>
         <tr><td>3</td><td>3</td><td>C, G y D · cambios de un minuto con dos parejas de acordes</td></tr>
         <tr><td>4</td><td>3 y 4</td><td>E, A y Dm · negras con metrónomo a 60–70</td></tr>
-        <tr><td>5</td><td>4</td><td>Patrón «abajo, abajo-arriba, arriba-abajo-arriba» · una progresión de cuatro acordes</td></tr>
-        <tr><td>6</td><td>5</td><td>Pentatónica de La menor con púa alternada · sigue rasgueando 5 min</td></tr>
+        <tr><td>5</td><td>4</td><td>Patrón «abajo, abajo-arriba, arriba-abajo-arriba» · una progresión de cuatro acordes · «La cucaracha» en Canciones</td></tr>
+        <tr><td>6</td><td>5</td><td>Pentatónica de La menor con púa alternada · rasguea «La Llorona» o «De colores» 5 min</td></tr>
         <tr><td>7</td><td>5 y 6</td><td>Improvisar sobre el acompañamiento · escribir motivos de 3–4 notas</td></tr>
         <tr><td>8</td><td>6</td><td>Componer una melodía de 2 compases, pasarla a tu guitarra y grabarte</td></tr>
       </tbody>
@@ -558,6 +631,19 @@ E|---------|---------|---------|---------|</pre>
 </main>
 </div>
 </div>
+
+<dialog id="bienvenida" aria-labelledby="bv-titulo">
+  <div class="bv">
+    <div class="bv-cabeza">
+      <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" fill="#2747d8"/><g stroke="#e8dcc0" stroke-linecap="round"><line x1="96" y1="196" x2="416" y2="196" stroke-width="6"/><line x1="96" y1="256" x2="416" y2="256" stroke-width="8"/><line x1="96" y1="316" x2="416" y2="316" stroke-width="10"/></g><path d="M256 150 C 318 150 352 168 352 204 C 352 262 300 330 256 368 C 212 330 160 262 160 204 C 160 168 194 150 256 150 Z" fill="#f2a900" stroke="#16203a" stroke-width="10"/></svg>
+      <div class="bv-pasos" id="bv-pasos" aria-hidden="true"><i></i><i></i><i></i></div>
+      <button class="enlace" id="bv-saltar" type="button">Saltar</button>
+    </div>
+    <h2 id="bv-titulo"></h2>
+    <p id="bv-texto"></p>
+    <div class="bv-opciones" id="bv-opciones"></div>
+  </div>
+</dialog>
 
 <script>
 const $ = (s, r = document) => r.querySelector(s);
@@ -575,9 +661,29 @@ const NIVELES = [
   { id: 'notas', n: '2', titulo: 'Primeras notas', metas: ['Leo una tablatura sencilla', 'Toco el Himno a la alegría sin pausas', 'Acerté 5 notas seguidas en el reto'] },
   { id: 'acordes', n: '3', titulo: 'Acordes', metas: ['Em, Am, C, G y D me suenan limpios cuerda por cuerda', 'Cambio de acorde sin mirar la mano derecha', 'Hago 30 cambios limpios en un minuto'] },
   { id: 'ritmo', n: '4', titulo: 'Ritmo', metas: ['Mantengo negras con el metrónomo a 70', 'Toco el patrón universal sin detener la mano', 'Toco una progresión de 4 acordes completa'] },
+  { id: 'canciones', n: '♪', titulo: 'Canciones', metas: ['Toqué completa una canción de dos acordes', 'Toqué un vals con «bajo, rasgueo, rasgueo»', 'Toqué una canción completa en modo «yo toco los acordes»'] },
   { id: 'escalas', n: '5', titulo: 'Escalas', metas: ['Toco la pentatónica de La menor subiendo y bajando', 'Sé dónde están las tónicas', 'Improvisé un minuto sobre el acompañamiento'] },
   { id: 'melodia', n: '6', titulo: 'Tu melodía', metas: ['Escribí un motivo de 3 o 4 notas', 'Compuse 2 compases que terminan en La', 'Toqué mi melodía en la guitarra leyendo la tablatura'] },
   { id: 'plan', n: '★', titulo: 'Plan de práctica', metas: [] },
+];
+// Canciones tradicionales o de dominio público, ordenadas por dificultad. Solo usan acordes del Nivel 3.
+// Patrón por corcheas: B = bajo, D = abajo, U = arriba, . = la mano pasa sin tocar. Un compás con "D G" cambia a la mitad.
+const CANCIONES = [
+  { titulo: 'Himno a la alegría', origen: 'Ludwig van Beethoven, 1824 · dominio público', nivel: 'Muy fácil', tiempos: 4, bpm: 80, patron: 'D.D.D.D.',
+    consejo: 'Es la melodía del Nivel 2, ahora con acordes. Solo cambias entre C y G, un rasgueo por tiempo.',
+    partes: [['Primera frase', ['C', 'G', 'C', 'G']], ['Segunda frase', ['C', 'G', 'C', 'G C']]] },
+  { titulo: 'La cucaracha', origen: 'Canción tradicional mexicana', nivel: 'Fácil', tiempos: 4, bpm: 100, patron: 'D.DU.UDU',
+    consejo: 'Dos acordes, A y E, con el patrón universal del Nivel 4. Cambia justo en el «1» de cada compás.',
+    partes: [['Coro', ['A', 'A', 'E', 'E', 'E', 'E', 'A', 'A']]] },
+  { titulo: 'La Llorona', origen: 'Son istmeño tradicional de Oaxaca', nivel: 'Fácil · vals', tiempos: 3, bpm: 100, patron: 'B.D.D.',
+    consejo: 'Vals lento en tres tiempos: en el «1» toca solo la cuerda más grave del acorde y en el «2» y el «3» rasguea.',
+    partes: [['Estrofa', ['Am', 'Am', 'E', 'E', 'Am', 'Dm', 'E', 'Am']], ['Coro', ['Am', 'Dm', 'Am', 'E', 'Am', 'Dm', 'Am', 'E']]] },
+  { titulo: 'De colores', origen: 'Canción tradicional', nivel: 'Intermedio · vals', tiempos: 3, bpm: 120, patron: 'B.D.D.',
+    consejo: 'Tres acordes: A, D y E. El D aparece una sola vez; ve preparando los dedos desde el compás anterior.',
+    partes: [['Primera línea', ['A', 'A', 'A', 'E']], ['Segunda línea', ['E', 'E', 'E', 'A']], ['Tercera línea', ['A', 'A', 'D', 'D']], ['Coro', ['E', 'E', 'A', 'A', 'E', 'E', 'A', 'A']]] },
+  { titulo: 'La bamba', origen: 'Son jarocho tradicional de Veracruz', nivel: 'Reto', tiempos: 4, bpm: 96, patron: 'D.DU.UDU',
+    consejo: 'Dos acordes por compás: D y G en el primero, A en el segundo. Empieza lento; la versión más famosa va a más de 150.',
+    partes: [['Ciclo que se repite', ['D G', 'A', 'D G', 'A']]] },
 ];
 // Trastes de la 6ª a la 1ª cuerda (-1 = no se toca) y dedos
 const ACORDES = {
@@ -661,6 +767,10 @@ function rasguear(nom, cuando, abajo = true, vol = 0.32, voz = '') {
   let cs = [6, 5, 4, 3, 2, 1].filter(c => t[6 - c] >= 0);
   if (!abajo) cs = cs.slice(-4).reverse();
   cs.forEach((c, i) => tocar(c, t[6 - c], ini + i * (abajo ? 0.018 : 0.012), abajo ? vol : vol * 0.7, voz));
+}
+function bajo(nom, cuando, vol = 0.42, voz = '') {                  // solo la cuerda más grave del acorde
+  const t = ACORDES[nom].t, c = [6, 5, 4, 3, 2, 1].find(c => t[6 - c] >= 0);
+  tocar(c, t[6 - c], cuando, vol, voz);
 }
 function clic(t, fuerte) {
   const o = ctx.createOscillator(), g = ctx.createGain();
@@ -1262,7 +1372,8 @@ $('#himno-mic').addEventListener('click', e => alternarOido(e.currentTarget, $('
 }, () => { dpNotas.marcar([[], [], [], [], [], []]); }));
 
 // ---------- Nivel 3: acordes ----------
-$('#acordes').innerHTML = Object.entries(ACORDES).map(([nom, a]) => {
+function diagramaAcorde(nom) {
+  const a = ACORDES[nom];
   let s = '<svg viewBox="0 0 100 120" aria-hidden="true">';
   for (let i = 0; i < 6; i++) s += `<line class="${a.t[i] < 0 ? '' : 'cs'}" style="--i:${i}" x1="${15 + i * 14}" x2="${15 + i * 14}" y1="28" y2="108"/>`;
   for (let k = 0; k <= 4; k++) s += `<line x1="15" x2="85" y1="${28 + k * 20}" y2="${28 + k * 20}" stroke-width="${k ? 1 : 4}"/>`;
@@ -1271,8 +1382,10 @@ $('#acordes').innerHTML = Object.entries(ACORDES).map(([nom, a]) => {
     if (t <= 0) s += `<text class="marca" x="${x}" y="19">${t < 0 ? '×' : '○'}</text>`;
     else s += `<circle class="dedo" cx="${x}" cy="${18 + t * 20}" r="6.5"/><text class="dn" x="${x}" y="${18 + t * 20}">${a.d[i]}</text>`;
   });
-  return `<button type="button" data-a="${nom}" aria-label="Escuchar ${a.es}">${s}</svg><strong>${nom}</strong><small>${a.es}</small></button>`;
-}).join('');
+  return s + '</svg>';
+}
+$('#acordes').innerHTML = Object.entries(ACORDES).map(([nom, a]) =>
+  `<button type="button" data-a="${nom}" aria-label="Escuchar ${a.es}">${diagramaAcorde(nom)}<strong>${nom}</strong><small>${a.es}</small></button>`).join('');
 $('#acordes').addEventListener('click', e => {
   const b = e.target.closest('button'); if (b) { pararTodo(); rasguear(b.dataset.a, undefined, true, 0.45); reiniciar(b, 'rasga'); }
 });
@@ -1411,6 +1524,121 @@ $('#m-copiar').addEventListener('click', async () => {
 });
 pintarSeq();
 
+// ---------- Canciones: tocar junto ----------
+let cancionSel = Math.min(CANCIONES.length - 1, +leer('cancion', 0) || 0);
+const cancion = () => CANCIONES[cancionSel];
+const golpesDe = s => s.partes.flatMap(([, compases]) => compases).map(c => c.split(' '));   // [['C'], ['G', 'C'], ...]
+function acordesDe(s) { return [...new Set(golpesDe(s).flat())]; }
+function pintarListaCanciones() {
+  $('#c-lista').innerHTML = CANCIONES.map((s, i) => `<button type="button" data-i="${i}" aria-pressed="${i === cancionSel}">
+    <strong>${s.titulo}</strong><span class="acs">${acordesDe(s).join(' · ')}</span><small>${s.nivel} · ${s.tiempos}/4</small></button>`).join('');
+}
+function pintarCancion() {
+  const s = cancion(), cuenta = ['1', 'y', '2', 'y', '3', 'y', '4', 'y'].slice(0, s.tiempos * 2);
+  const nombreGolpe = { B: 'bajo', D: '↓', U: '↑', '.': '' };
+  $('#c-titulo').textContent = s.titulo;
+  $('#c-compas').textContent = `${s.tiempos}/4 · ${s.nivel}`;
+  $('#c-origen').textContent = s.origen;
+  $('#c-consejo').textContent = s.consejo;
+  $('#c-acordes').innerHTML = acordesDe(s).map(a => `<figure>${diagramaAcorde(a)}<figcaption>${a}</figcaption></figure>`).join('');
+  $('#c-pulso').style.gridTemplateColumns = `repeat(${s.tiempos * 2}, minmax(0, 1fr))`;
+  $('#c-pulso').innerHTML = cuenta.map((n, i) => `<div><b>${nombreGolpe[s.patron[i]]}</b><small>${n}</small></div>`).join('');
+  let n = 0;
+  $('#c-hoja').innerHTML = s.partes.map(([parte, compases]) =>
+    `<div><h4>${parte}</h4><div class="c-fila">${compases.map(c => `<span data-n="${n++}">${c.split(' ').map(a => `<i>${a}</i>`).join('')}</span>`).join('')}</div></div>`).join('');
+  $('#c-bpm').value = s.bpm; $('#c-bpm-o').textContent = s.bpm;
+  $('#c-actual').textContent = golpesDe(s)[0][0]; $('#c-sigue').textContent = siguienteAcorde(0, 0);
+}
+function siguienteAcorde(n, k) {                                    // el próximo acorde distinto al que suena
+  const lista = golpesDe(cancion()).flatMap((c, i) => c.map((a, j) => [i, j, a]));
+  const idx = lista.findIndex(([i, j]) => i === n && j === k), actual = lista[idx][2];
+  for (let paso = 1; paso < lista.length; paso++) {
+    const a = lista[(idx + paso) % lista.length][2];
+    if (a !== actual) return a;
+  }
+  return actual;
+}
+function luzCancion(n, i, k, cuenta) {
+  $$('#c-pulso div').forEach((d, j) => d.classList.toggle('ahora', j === i));
+  $$('#c-hoja span').forEach(c => { const m = +c.dataset.n; c.classList.toggle('ahora', m === n); c.classList.toggle('hecho', n >= 0 && m < n); });
+  const el = $('#c-actual');
+  if (cuenta) { el.textContent = cuenta; return; }
+  if (n < 0) return;
+  const a = golpesDe(cancion())[n][k];
+  if (el.textContent !== a) { el.textContent = a; reiniciar(el, 'cambia'); }
+  $('#c-sigue').textContent = siguienteAcorde(n, k);
+}
+const relojCancion = reloj(() => +$('#c-bpm').value, (paso, t) => {
+  const s = cancion(), pc = s.tiempos * 2, g = golpesDe(s), i = paso % pc;
+  if (paso < pc) {                                                // compás de cuenta: solo clics
+    if (i % 2 === 0) clic(t, i === 0);
+    alSonar(t, () => relojCancion.activo && luzCancion(-1, i, 0, i % 2 === 0 ? String(i / 2 + 1) : ''));
+    return;
+  }
+  const n = Math.floor((paso - pc) / pc) % g.length, k = Math.min(g[n].length - 1, Math.floor(i / (pc / g[n].length))), a = g[n][k], golpe = s.patron[i];
+  if (!$('#c-yo').checked) {
+    if (golpe === 'B') bajo(a, t);
+    else if (golpe !== '.') rasguear(a, t, golpe === 'D');
+  }
+  if (($('#c-metro').checked || $('#c-yo').checked) && i % 2 === 0) clic(t, i === 0);
+  alSonar(t, () => relojCancion.activo && luzCancion(n, i, k));
+}, () => { luzCancion(-1, -1, 0); $('#c-actual').textContent = golpesDe(cancion())[0][0]; $('#c-sigue').textContent = siguienteAcorde(0, 0); });
+conmutador($('#c-btn'), relojCancion);
+$('#c-lista').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  pararTodo();
+  cancionSel = +b.dataset.i; guardar('cancion', cancionSel);
+  pintarListaCanciones(); pintarCancion();
+});
+$('#c-bpm').addEventListener('input', e => $('#c-bpm-o').textContent = e.target.value);
+pintarListaCanciones(); pintarCancion();
+
+// ---------- Bienvenida: primera visita ----------
+const BV = { guitarra: true };
+const PASOS_BV = [
+  () => ({ titulo: 'Bienvenido a Guitarra desde cero', texto: 'Aprende a tu ritmo, desde afinar hasta crear tus propias melodías. Funciona directo en tu navegador: no tienes que instalar ni descargar nada. ¿Tienes una guitarra a la mano?',
+    opciones: [['Sí, aquí la tengo', () => { BV.guitarra = true; pasoBV(1); }], ['Todavía no', () => { BV.guitarra = false; pasoBV(1); }]] }),
+  () => ({ titulo: '¿Con qué mano rasgueas?', texto: 'La mayoría rasguea con la derecha. Si eres zurdo, el espejo de postura revisará tus manos al revés.',
+    opciones: [['Con la derecha', () => { ponerZurdo(false); pasoBV(2); }], ['Con la izquierda (soy zurdo)', () => { ponerZurdo(true); pasoBV(2); }]] }),
+  () => BV.guitarra
+    ? { titulo: 'Primero, a afinar', texto: 'El afinador escucha tu guitarra y te dice si aprietas o aflojas cada clavija. Tu navegador te pedirá permiso para usar el micrófono.',
+        opciones: [['Ir al afinador', () => cerrarBV('guitarra', '#af-btn')], ['Explorar por mi cuenta', () => cerrarBV()]] }
+    : { titulo: 'Empieza sin guitarra', texto: 'Todo lo que ves suena en la página: puedes aprender las cuerdas, el diapasón y los acordes desde ya. Cuando tengas tu guitarra, el afinador te espera en el Nivel 1.',
+        opciones: [['Empezar por el Nivel 1', () => cerrarBV('guitarra')], ['Explorar por mi cuenta', () => cerrarBV()]] },
+];
+function ponerZurdo(z) { guardar('zurdo', z); const c = $('#po-zurdo'); if (c) c.checked = z; }
+function pasoBV(i) {
+  const p = PASOS_BV[i]();
+  $$('#bv-pasos i').forEach((e, j) => e.classList.toggle('on', j <= i));
+  $('#bv-titulo').textContent = p.titulo;
+  $('#bv-texto').textContent = p.texto;
+  $('#bv-opciones').innerHTML = '';
+  p.opciones.forEach(([texto, accion], j) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'boton' + (j ? ' sec' : ''); b.textContent = texto;
+    b.addEventListener('click', accion);
+    $('#bv-opciones').append(b);
+  });
+  $('#bv-opciones button').focus();
+}
+function cerrarBV(vista, foco) {
+  guardar('bienvenida', true);
+  $('#bienvenida').close();
+  if (!vista) return;
+  if (location.hash !== '#' + vista) location.hash = vista; else mostrar();
+  if (foco) setTimeout(() => $(foco).closest('.tarjeta').scrollIntoView({ behavior: quieto.matches ? 'auto' : 'smooth', block: 'start' }), 60);
+  else scrollTo(0, 0);
+}
+function abrirBV() {
+  const d = $('#bienvenida');
+  if (typeof d.showModal !== 'function') return;                   // navegadores muy viejos: se omite sin romper nada
+  pasoBV(0); d.showModal();
+  $('#bv-opciones button').focus();
+}
+$('#bv-saltar').addEventListener('click', () => cerrarBV());
+$('#bienvenida').addEventListener('cancel', () => guardar('bienvenida', true));   // tecla Esc
+$('#ver-bienvenida').addEventListener('click', abrirBV);
+
 // ---------- Navegación, objetivos y avance ----------
 const hechos = leer('hechos', {});
 function pintarIndice() {
@@ -1447,6 +1675,7 @@ $('#notacion').addEventListener('change', e => { notacion = e.target.value; pone
 addEventListener('hashchange', mostrar);
 ponerNombres();
 mostrar();
+if (!leer('bienvenida', false)) abrirBV();
 </script>
 </body>
 </html>

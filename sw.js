@@ -2,7 +2,7 @@
 // - La página se pide primero a la red (para recibir actualizaciones) y, si no hay red, sale de la caché.
 // - Lo pesado (MediaPipe, modelos, tipografías) se guarda solo cuando se usa por primera vez,
 //   así un equipo modesto o un plan de datos limitado no descarga 20 MB que quizá nunca use.
-const APP = 'guitarra-app-v2';          // cambia este número al publicar una versión nueva
+const APP = 'guitarra-app-v3';          // cambia este número al publicar una versión nueva
 const RECURSOS = 'guitarra-recursos-v1'; // se conserva entre versiones para no volver a bajar los modelos
 const BASE = ['./', './index.html', './manifest.webmanifest', './iconos/icono-192.png', './iconos/icono-512.png'];
 

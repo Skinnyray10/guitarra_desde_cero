@@ -10,6 +10,8 @@ Tutorial interactivo para aprender guitarra desde cero hasta componer tus propia
 - Sonido de cuerda sintetizado (Karplus-Strong) con Web Audio y animaciones de cuerdas.
 - Afinador con micrófono (detección de tono McLeod, sin librerías).
 - Retos que escuchan tu guitarra: encontrar notas y tocar el Himno a la alegría nota por nota.
+- Cinco canciones tradicionales para tocar junto: Himno a la alegría, La cucaracha, La Llorona, De colores y La bamba.
+- Bienvenida guiada la primera vez que entras.
 - App instalable (PWA): abre sin internet en computadora, Android y iPhone.
 - Espejo de postura con cámara: cuerpo y manos con MediaPipe Tasks Vision de Google.
 
